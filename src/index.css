@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+h1 {
+@apply text-4xl font-bold my-4;
+}
+h2 {
+@apply text-3xl font-semibold my-3;
+}
+h3 {
+@apply text-2xl font-medium my-2;
+}
+p {
+@apply text-base leading-relaxed;
+}
+.details a {
+@apply text-base leading-relaxed;
+text-decoration: underline;
+color: blue;
+}
+.prose a{
+    @apply text-base leading-relaxed;
+    text-decoration: underline;
+    color: blue;
+}
+pre{
+background-color: rgb(27, 27, 27);color: white;padding: 15px;border-radius: 18px;width: 100%;overflow: auto;
+}
+code{
+font-weight: bold;
+}

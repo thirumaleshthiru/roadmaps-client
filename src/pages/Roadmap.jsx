@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useCurrentLocation } from '../utils/useFulFunctions.js';
 import { ChevronRight, Award, Book } from 'lucide-react';
+import axiosInstance from '../utils/axiosInstance';
 
-// Import components
-import Concept from '../components/Concept';
+ import Concept from '../components/Concept';
 import ConceptPopup from '../components/ConceptPopup';
- 
+
 function Roadmap() {
   const { roadmapname } = useParams();
   const [roadmap, setRoadmap] = useState(null);
@@ -18,14 +17,15 @@ function Roadmap() {
   const [error, setError] = useState(null);
   const [currentUrl] = useCurrentLocation();
 
-  
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
-  // Fetch roadmap data and load saved progress
   useEffect(() => {
     setIsLoading(true);
-    
-    axios
-      .get(`http://localhost:7000/roadmaps/roadmapbyname/${roadmapname}`)
+
+    axiosInstance
+      .get(`/api/roadmaps/roadmapbyname/${roadmapname}`)
       .then((response) => {
         setRoadmap(response.data);
         setIsLoading(false);
@@ -36,7 +36,6 @@ function Roadmap() {
         setIsLoading(false);
       });
 
-    // Load marked concepts from localStorage
     try {
       const storedConcepts = JSON.parse(localStorage.getItem('markedConcepts')) || [];
       setMarkedConcepts(storedConcepts);
@@ -46,7 +45,6 @@ function Roadmap() {
     }
   }, [roadmapname]);
 
-  // Handlers
   const handleConceptClick = (concept) => {
     setSelectedConcept(concept);
   };
@@ -68,8 +66,6 @@ function Roadmap() {
     localStorage.setItem('markedConcepts', JSON.stringify(updatedMarkedConcepts));
   };
 
- 
-  // Loading state
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -78,7 +74,6 @@ function Roadmap() {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className="flex flex-col justify-center items-center h-screen">
@@ -93,7 +88,6 @@ function Roadmap() {
     );
   }
 
-  // If roadmap is not found
   if (!roadmap) {
     return (
       <div className="flex flex-col justify-center items-center h-screen">
@@ -104,8 +98,6 @@ function Roadmap() {
       </div>
     );
   }
-
- 
 
   return (
     <>
@@ -119,7 +111,6 @@ function Roadmap() {
       </Helmet>
 
       <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Roadmap Header */}
         <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl shadow-xl p-8 mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
             {roadmap.roadmap_name.toUpperCase()}
@@ -127,12 +118,8 @@ function Roadmap() {
           <p className="text-md md:text-lg text-indigo-100 mb-6">
             {roadmap.roadmap_description}
           </p>
-          
-        
-           
         </div>
 
-        {/* Breadcrumb Navigation */}
         <div className="flex items-center space-x-2 text-sm text-gray-600 mb-8">
           <a href="/" className="hover:text-indigo-600 transition-colors">Home</a>
           <ChevronRight size={16} />
@@ -141,7 +128,6 @@ function Roadmap() {
           <span className="font-medium text-indigo-600">{roadmap.roadmap_name}</span>
         </div>
 
-        {/* Main Content */}
         {roadmap.concepts && roadmap.concepts.length > 0 ? (
           <div className="relative p-6">
             <div className="flex items-center mb-8">
@@ -164,8 +150,7 @@ function Roadmap() {
             </p>
           </div>
         )}
-        
-        {/* Concept Popup */}
+
         <ConceptPopup concept={selectedConcept} onClose={handleClosePopup} />
       </div>
     </>
@@ -175,10 +160,8 @@ function Roadmap() {
 function RoadmapDetails({ data, onConceptClick, markedConcepts, toggleConceptMark }) {
   return (
     <div className="relative w-full max-w-4xl mx-auto pb-16">
-      {/* Timeline center line */}
       <div className="absolute left-1/2 transform -translate-x-1/2 w-1 sm:w-2 h-full bg-gradient-to-b from-indigo-300 to-purple-300 rounded-full shadow-lg"></div>
       
-      {/* Render concepts */}
       {data.map((concept, index) => (
         <Concept
           key={concept.concept_id}

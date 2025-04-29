@@ -8,6 +8,10 @@ const Post = () => {
   const [error, setError] = useState(null);
   const hasIncrementedView = useRef(false);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const decodeId = (encodedId) => {
     try {
       return atob(encodedId);
@@ -29,14 +33,14 @@ const Post = () => {
     const fetchPostAndIncrementView = async () => {
       try {
         // Fetch the blog post using Axios instance
-        const response = await axiosInstance.get(`/blogs/blog/${decodedId}`);
+        const response = await axiosInstance.get(`/api/blogs/blog/${decodedId}`);
         if (isMounted) {
           setPost(response.data);
 
           // Increment view count (only once)
           if (!hasIncrementedView.current) {
             hasIncrementedView.current = true;
-            await axiosInstance.patch(`/blogs/incrementviews/${decodedId}`);
+            await axiosInstance.patch(`/api/blogs/incrementviews/${decodedId}`);
           }
         }
       } catch (err) {

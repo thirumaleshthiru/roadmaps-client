@@ -42,8 +42,8 @@ function Concept({ concept, index, onClick, marked, onMarkToggle, totalConcepts 
           
           {/* Card Footer */}
           <div className="mt-4 flex items-center justify-between text-sm">
-            <span className="text-indigo-600 font-medium flex items-center">
-              Learn more <ArrowRight size={14} className="ml-1" />
+            <span className="text-indigo-600 font-medium flex  items-center">
+              Learn more
             </span>
             
             <span className="text-gray-500">

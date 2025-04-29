@@ -3,6 +3,7 @@ import { useAuth } from "../utils/AuthConext";
 import { useNavigate, useParams } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import axiosInstance from "../utils/axiosInstance";
 
 function EditBlog() {
   const { token } = useAuth();
@@ -25,31 +26,43 @@ function EditBlog() {
   useEffect(() => {
     async function fetchBlog() {
       try {
-        const response = await fetch(`http://localhost:7000/blogs/blog/${id}`, {
+        const response = await axiosInstance.get(`/api/blogs/blog/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || "Failed to fetch blog data");
+        
+        const blog = response.data;
+        
+        try {
+          const imageResponse = await fetch(blog.blog_image);
+          const imageBlob = await imageResponse.blob();
+          const imageFile = new File([imageBlob], "original_image.jpg", { type: imageBlob.type });
+          
+          setFormData({
+            blog_name: blog.blog_name,
+            blog_description: blog.blog_description,
+            blog_image: imageFile,
+            content: blog.content,
+          });
+        } catch (imageErr) {
+          console.error("Error loading image:", imageErr);
+          setError(`Error loading image: ${imageErr.message}`);
+          // Still set the form data even if image loading fails
+          setFormData({
+            blog_name: blog.blog_name,
+            blog_description: blog.blog_description,
+            blog_image: null,
+            content: blog.content,
+          });
         }
-        const blog = await response.json();
-        const imageResponse = await fetch(blog.blog_image);
-        const imageBlob = await imageResponse.blob();
-        const imageFile = new File([imageBlob], "original_image.jpg", { type: imageBlob.type });
-  
-        setFormData({
-          blog_name: blog.blog_name,
-          blog_description: blog.blog_description,
-          blog_image: imageFile, // Set the original image directly
-          content: blog.content,
-        });
       } catch (err) {
-        setError(err.message);
+        const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch blog data';
+        console.error('Error:', errorMessage);
+        setError(`Error: ${errorMessage}`);
       }
     }
     fetchBlog();
   }, [id, token]);
-  
+
   function handleInputChange(e) {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -63,40 +76,39 @@ function EditBlog() {
     const file = e.target.files[0];
     setFormData((prev) => ({ ...prev, blog_image: file })); // Replace the image with the uploaded one
   }
-  
 
   async function handleSubmit(e) {
     e.preventDefault();
+    setError("");
+    setSuccess("");
   
     const formDataToSubmit = new FormData();
     formDataToSubmit.append("blog_name", formData.blog_name);
     formDataToSubmit.append("blog_description", formData.blog_description);
     formDataToSubmit.append("content", formData.content);
   
-    // Add the image: check if it's a new file or the original image
     if (formData.blog_image instanceof File) {
       formDataToSubmit.append("blog_image", formData.blog_image);
     }
   
     try {
-      const response = await fetch(`http://localhost:7000/blogs/update/${id}`, {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formDataToSubmit,
+      await axiosInstance.put(`/api/blogs/update/${id}`, formDataToSubmit, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        },
       });
   
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update blog");
-      }
-  
       setSuccess("Blog updated successfully!");
+      setTimeout(() => {
+        navigate("/manageblogs");
+      }, 1500);
     } catch (err) {
-      setError(err.message);
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to update blog';
+      console.error('Error:', errorMessage);
+      setError(`Error: ${errorMessage}`);
     }
   }
-  
-  
 
   const quillModules = {
     toolbar: [

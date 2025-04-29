@@ -1,9 +1,10 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../utils/AuthConext"; 
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "../utils/axiosInstance";  // import the axiosInstance
 
 function Login() {
-  const { login,token } = useAuth();
+  const { login, token } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
@@ -17,29 +18,18 @@ function Login() {
   async function handleSubmit(e) {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:7000/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-  
-   
-      if (!response.ok) {
-        const text = await response.text();
-        console.error("Error Response Body:", text);
-        throw new Error("Login failed: " + response.status);
-      }
-  
-      const data = await response.json();
-      console.log("Parsed Data:", data);
-  
-      login(data.token);
+      const response = await axiosInstance.post(
+        "/api/auth/login",
+        formData,
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      login(response.data.token);
       navigate("/dashboard");
     } catch (err) {
       setError(err.message);
     }
   }
-  
 
   function handleChange(e) {
     const { name, value } = e.target;

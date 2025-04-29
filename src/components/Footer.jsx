@@ -39,7 +39,7 @@ const Footer = () => {
         </div>
 
         <div className="mt-8 text-center text-xs text-gray-500">
-          <p>&copy; 2024 RoadmapMonk. All Rights Reserved.</p>
+          <p>&copy; 2025 Pathly. All Rights Reserved.</p>
         </div>
       </div>
     </footer>

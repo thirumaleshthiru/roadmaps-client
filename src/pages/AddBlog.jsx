@@ -5,6 +5,7 @@ import { Helmet } from "react-helmet-async";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { FileText, Image, AlignLeft, Type } from "lucide-react";
+import axiosInstance from "../utils/axiosInstance";
 
 function AddBlog() {
   const { token } = useAuth();
@@ -40,7 +41,7 @@ function AddBlog() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    
+
     const formDataToSubmit = new FormData();
     formDataToSubmit.append('blog_name', formData.blog_name);
     formDataToSubmit.append('blog_description', formData.blog_description);
@@ -51,22 +52,16 @@ function AddBlog() {
     }
 
     try {
-      const response = await fetch("http://localhost:7000/blogs/add", {
-        method: "POST",
+      const response = await axiosInstance.post("/api/blogs/add", formDataToSubmit, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        body: formDataToSubmit,
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to add blog");
-      }
 
       setSuccess("Blog added successfully!");
     } catch (err) {
-      setError(err.message);
+      const errorMsg = err.response?.data?.message || "Failed to add blog";
+      setError(errorMsg);
     }
   }
 
@@ -107,7 +102,7 @@ function AddBlog() {
               {error}
             </div>
           )}
-          
+
           {success && (
             <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
               {success}
@@ -120,7 +115,7 @@ function AddBlog() {
                 <Type className="text-indigo-600" />
                 <h2 className="text-xl font-semibold text-slate-900">Blog Details</h2>
               </div>
-              
+
               <div className="space-y-6">
                 <div>
                   <label htmlFor="blog_name" className="block text-sm font-medium text-slate-700 mb-2">
@@ -159,7 +154,7 @@ function AddBlog() {
                 <Image className="text-indigo-600" />
                 <h2 className="text-xl font-semibold text-slate-900">Featured Image</h2>
               </div>
-              
+
               <div>
                 <label htmlFor="blog_image" className="block text-sm font-medium text-slate-700 mb-2">
                   Upload Image
@@ -181,7 +176,7 @@ function AddBlog() {
                 <FileText className="text-indigo-600" />
                 <h2 className="text-xl font-semibold text-slate-900">Blog Content</h2>
               </div>
-              
+
               <div>
                 <ReactQuill
                   value={formData.content}

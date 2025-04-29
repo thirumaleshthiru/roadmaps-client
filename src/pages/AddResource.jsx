@@ -5,6 +5,7 @@ import { Helmet } from "react-helmet-async";
 import { Library, AlertCircle, CheckCircle2, ArrowRight, Youtube, Globe, FileText, Book, FileIcon } from "lucide-react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import axiosInstance from "../utils/axiosInstance";
 
 function AddResource() {
   const { token } = useAuth();
@@ -48,19 +49,11 @@ function AddResource() {
     setSuccess("");
 
     try {
-      const response = await fetch("http://localhost:7000/resources/add", {
-        method: "POST",
+      const response = await axiosInstance.post("/api/resources/add", formData, {
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to add resource");
-      }
 
       setSuccess("Resource added successfully!");
       setFormData({
@@ -70,7 +63,7 @@ function AddResource() {
         resource_description: ""
       });
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.message || "Failed to add resource");
     }
   }
 

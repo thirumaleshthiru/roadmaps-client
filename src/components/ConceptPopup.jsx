@@ -4,6 +4,31 @@ import { X, BookOpen, Link, Check } from 'lucide-react';
 function ConceptPopup({ concept, onClose }) {
   const modalRef = useRef(null);
   const [isAnimating, setIsAnimating] = useState(true);
+  const [quote, setQuote] = useState('');
+
+  // Collection of motivational quotes
+  const motivationalQuotes = [
+    "The only way to do great work is to love what you do.",
+    "Believe you can and you're halfway there.",
+    "It always seems impossible until it's done.",
+    "Your attitude determines your direction.",
+    "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+    "The future belongs to those who believe in the beauty of their dreams.",
+    "Don't watch the clock; do what it does. Keep going.",
+    "The only limit to our realization of tomorrow is our doubts of today.",
+    "Strength doesn't come from what you can do. It comes from overcoming the things you once thought you couldn't.",
+    "The harder you work for something, the greater you'll feel when you achieve it.",
+    "Dreams don't work unless you do.",
+    "The only person you are destined to become is the person you decide to be.",
+    "Don't be pushed around by the fears in your mind. Be led by the dreams in your heart.",
+    "The best time to plant a tree was 20 years ago. The second best time is now.",
+    "You don't have to be great to start, but you have to start to be great.",
+    "Every moment is a fresh beginning.",
+    "You are never too old to set another goal or to dream a new dream.",
+    "The only way to achieve the impossible is to believe it is possible.",
+    "Don't let yesterday take up too much of today.",
+    "What you get by achieving your goals is not as important as what you become by achieving your goals."
+  ];
 
   // Handle animation
   useEffect(() => {
@@ -11,6 +36,14 @@ function ConceptPopup({ concept, onClose }) {
       setIsAnimating(true);
       const timer = setTimeout(() => setIsAnimating(false), 300);
       return () => clearTimeout(timer);
+    }
+  }, [concept]);
+
+  // Select a random quote when component mounts or concept changes
+  useEffect(() => {
+    if (concept) {
+      const randomIndex = Math.floor(Math.random() * motivationalQuotes.length);
+      setQuote(motivationalQuotes[randomIndex]);
     }
   }, [concept]);
 
@@ -38,7 +71,7 @@ function ConceptPopup({ concept, onClose }) {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscapeKey);
     };
-  }, [onClose]);
+  }, []);
 
   const handleClose = () => {
     setIsAnimating(true);
@@ -93,10 +126,10 @@ function ConceptPopup({ concept, onClose }) {
           ></div>
         </div>
 
-        {/* Footer with Actions */}
+        {/* Footer with Actions and Random Quote */}
         <div className="p-4 md:p-6 border-t bg-gray-50 flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
-          <div className="text-sm text-gray-600">
-            Part of the learning journey
+          <div className="text-sm text-gray-600 italic font-medium max-w-md pl-4 border-l-4 border-indigo-300">
+            {quote}
           </div>
           
           <div className="flex space-x-3">

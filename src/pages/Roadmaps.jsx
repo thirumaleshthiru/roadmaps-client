@@ -1,30 +1,28 @@
 import React, { useEffect, useState, useCallback, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { FileText, ArrowRight, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import axiosInstance from '../utils/axiosInstance.js';
+import { Map, Search, X, AlertCircle, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCurrentLocation } from '../utils/useFulFunctions.js';
 import { Helmet } from 'react-helmet-async';
 
-// Constants
-const ITEMS_PER_PAGE = 2;
+const ITEMS_PER_PAGE = 6;
 const DEBOUNCE_DELAY = 300;
 
-// Skeleton loader component for content
 const SkeletonLoader = () => (
-  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 animate-pulse">
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-pulse">
     {[...Array(6)].map((_, index) => (
-      <div key={index} className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200">
+      <div key={index} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6">
         <div className="flex justify-between items-start mb-6">
-          <div className="w-24 h-6 bg-slate-200 rounded-full"></div>
-          <div className="w-6 h-6 bg-slate-200 rounded"></div>
+          <div className="w-32 h-6 bg-gray-200 rounded-full"></div>
+          <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
         </div>
-        <div className="w-3/4 h-8 bg-slate-200 rounded mb-4"></div>
-        <div className="space-y-2 mb-8">
-          <div className="w-full h-4 bg-slate-200 rounded"></div>
-          <div className="w-5/6 h-4 bg-slate-200 rounded"></div>
-          <div className="w-4/6 h-4 bg-slate-200 rounded"></div>
+        <div className="w-4/5 h-8 bg-gray-200 rounded-lg mb-6"></div>
+        <div className="space-y-3 mb-8">
+          <div className="w-full h-4 bg-gray-200 rounded"></div>
+          <div className="w-5/6 h-4 bg-gray-200 rounded"></div>
+          <div className="w-4/6 h-4 bg-gray-200 rounded"></div>
         </div>
-        <div className="w-full h-12 bg-slate-200 rounded-xl"></div>
+        <div className="w-full h-12 bg-gray-200 rounded-xl"></div>
       </div>
     ))}
   </div>
@@ -39,73 +37,80 @@ function Roadmaps() {
   const navigate = useNavigate();
   const [, currentUrl] = useCurrentLocation();
 
-  // Memoized filter function
+    useEffect(() => {
+      window.scrollTo(0, 0);
+    }, []);
+
   const filterRoadmaps = useCallback((data, query) => {
     if (!query) return data;
     const lowercaseQuery = query.toLowerCase();
     return data.filter((roadmap) => 
       roadmap.roadmap_name.toLowerCase().includes(lowercaseQuery) ||
-      roadmap.roadmap_description.toLowerCase().includes(lowercaseQuery)
+      roadmap.roadmap_description?.toLowerCase().includes(lowercaseQuery)
     );
   }, []);
 
-  // Debounced search
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
     }, DEBOUNCE_DELAY);
-
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Data fetching with error handling and caching
   useEffect(() => {
     const controller = new AbortController();
-    
     const fetchRoadmaps = async () => {
       try {
         const cachedData = sessionStorage.getItem('roadmapsData');
         if (cachedData) {
-          setRoadmaps(JSON.parse(cachedData));
+          const parsedData = JSON.parse(cachedData);
+          // Sort roadmaps by name to maintain consistent order
+          const sortedData = [...parsedData].sort((a, b) => 
+            a.roadmap_name.localeCompare(b.roadmap_name)
+          );
+          setRoadmaps(sortedData);
           setLoading(false);
           
-          // Refresh cache in background
-          const response = await axios.get('http://localhost:7000/roadmaps/roadmaps', {
+          const response = await axiosInstance.get('/api/roadmaps/roadmaps', {
             signal: controller.signal
           });
-          sessionStorage.setItem('roadmapsData', JSON.stringify(response.data.roadmaps));
-          setRoadmaps(response.data.roadmaps);
+          // Sort the new data the same way
+          const sortedResponseData = [...response.data.roadmaps].sort((a, b) => 
+            a.roadmap_name.localeCompare(b.roadmap_name)
+          );
+          sessionStorage.setItem('roadmapsData', JSON.stringify(sortedResponseData));
+          setRoadmaps(sortedResponseData);
         } else {
-          const response = await axios.get('http://localhost:7000/roadmaps/roadmaps', {
+          const response = await axiosInstance.get('/api/roadmaps/roadmaps', {
             signal: controller.signal
           });
-          sessionStorage.setItem('roadmapsData', JSON.stringify(response.data.roadmaps));
-          setRoadmaps(response.data.roadmaps);
+          // Sort the initial data
+          const sortedResponseData = [...response.data.roadmaps].sort((a, b) => 
+            a.roadmap_name.localeCompare(b.roadmap_name)
+          );
+          sessionStorage.setItem('roadmapsData', JSON.stringify(sortedResponseData));
+          setRoadmaps(sortedResponseData);
           setLoading(false);
         }
       } catch (error) {
-        if (!axios.isCancel(error)) {
-          console.error('Error fetching roadmaps:', error);
+        if (!controller.signal.aborted) {
           setLoading(false);
         }
       }
     };
-
     fetchRoadmaps();
-
     return () => controller.abort();
   }, []);
 
   const handleCardClick = useCallback(async (roadmapId, roadmapName) => {
     try {
-      await axios.patch(`http://localhost:7000/roadmaps/updateviews/${roadmapId}`);
+      await axiosInstance.patch(`/api/roadmaps/updateviews/${roadmapId}`);
       navigate(`/roadmaps/${roadmapName.toLowerCase()}`);
     } catch (error) {
-      console.error('Error incrementing view count:', error);
+      // Handle error silently
     }
   }, [navigate]);
 
-  // Reset page on search
   useEffect(() => {
     setCurrentPage(1);
   }, [debouncedSearchQuery]);
@@ -123,11 +128,14 @@ function Roadmaps() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 py-12 md:px-8">
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 py-16 md:px-8">
           <div className="text-center mb-12">
-            <div className="w-3/4 h-12 bg-slate-200 rounded-lg mx-auto mb-4"></div>
-            <div className="w-2/4 h-6 bg-slate-200 rounded-lg mx-auto"></div>
+            <div className="w-3/4 h-16 bg-gray-200 rounded-2xl mx-auto mb-6"></div>
+            <div className="w-2/4 h-8 bg-gray-200 rounded-2xl mx-auto"></div>
+          </div>
+          <div className="max-w-3xl mx-auto mb-12">
+            <div className="h-16 bg-gray-200 rounded-2xl w-full"></div>
           </div>
           <SkeletonLoader />
         </div>
@@ -138,102 +146,105 @@ function Roadmaps() {
   return (
     <>
       <Helmet>
-        <title>Expert Roadmaps | Learning Hub</title>
-        <meta
-          name="description"
-          content="Master skills at your own pace using our expert roadmaps for Java, Python, UI/UX, Figma, and more."
-        />
+        <title>Learning Roadmaps | Education Hub</title>
+        <meta name="description" content="Explore structured learning paths to guide your journey from beginner to expert in various skills and technologies." />
         <link rel="canonical" href={currentUrl} />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="preconnect" href="http://localhost:7000" />
       </Helmet>
-      <div className="min-h-screen bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 py-12 md:px-8 space-y-12">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-slate-900 mb-6 tracking-tight">
+      <div className="min-h-screen">
+        <div className="max-w-7xl mx-auto px-4 py-16 md:px-8 space-y-12">
+          {/* Hero Section */}
+          <div className="text-center space-y-6">
+            <h1 className="text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
               Learning Roadmaps
             </h1>
-            <p className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
-              Structured paths to guide your learning journey from beginner to expert
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              Your personalized journey from beginner to expert in any field
             </p>
           </div>
-
+          
+          {/* Search Section */}
           <div className="max-w-3xl mx-auto">
-            <div className="relative">
-              <Search 
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" 
-                size={24}
-                aria-hidden="true"
-              />
-              <input
-                type="search"
-                placeholder="Search roadmaps by name or description..."
-                className="w-full pl-12 pr-4 h-14 rounded-xl border-2 border-slate-200 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 bg-white text-slate-800 placeholder-slate-400 text-lg transition-all duration-200"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                aria-label="Search roadmaps"
-              />
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-500"></div>
+              <div className="relative">
+                <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400" size={24} aria-hidden="true" />
+                <input
+                  type="search"
+                  placeholder="Search roadmaps by name or description..."
+                  className="w-full pl-16 pr-16 h-16 rounded-2xl border-0 bg-white/80 backdrop-blur-sm text-gray-800 text-lg focus:ring-4 focus:ring-indigo-500/20 transition-all duration-300"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  aria-label="Search roadmaps"
+                />
+                {searchQuery && (
+                  <button 
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-6 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                    aria-label="Clear search"
+                  >
+                    <X size={20} />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-
+          
+          {/* Results Count */}
+          {filteredRoadmaps.length > 0 && (
+            <div className="flex justify-between items-center max-w-7xl mx-auto px-1">
+              <p className="text-gray-600">
+                Showing <span className="font-semibold text-indigo-600">{startIndex + 1}-{Math.min(endIndex, filteredRoadmaps.length)}</span> of <span className="font-semibold text-indigo-600">{filteredRoadmaps.length}</span> roadmaps
+              </p>
+            </div>
+          )}
+          
+          {/* Roadmaps Grid */}
           <Suspense fallback={<SkeletonLoader />}>
             {currentRoadmaps.length === 0 ? (
-              <div className="max-w-2xl mx-auto text-center p-12 bg-white rounded-2xl shadow-sm border border-slate-200">
-                <div className="text-slate-400 mb-6">
-                  <Search size={48} className="mx-auto" aria-hidden="true" />
+              <div className="max-w-2xl mx-auto text-center p-12 bg-white rounded-2xl shadow-xl">
+                <div className="text-indigo-500 mb-6">
+                  <AlertCircle size={56} className="mx-auto" aria-hidden="true" />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-4">No roadmaps found</h3>
-                <p className="text-slate-600 mb-8 text-lg">
-                  We couldn't find any roadmaps matching your search. Try different keywords or browse all roadmaps.
-                </p>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">No roadmaps found</h3>
+                <p className="text-gray-600 mb-8 text-lg">We couldn't find any roadmaps matching your search. Try different keywords or browse all roadmaps.</p>
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="px-8 py-4 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors duration-200 text-lg font-medium"
+                  className="px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 text-lg font-medium shadow-lg hover:shadow-xl"
                 >
                   View All Roadmaps
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {currentRoadmaps.map((roadmap) => (
                   <div
                     key={roadmap.roadmap_id}
                     onClick={() => handleCardClick(roadmap.roadmap_id, roadmap.roadmap_name)}
-                    className="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 cursor-pointer relative overflow-hidden"
+                    className="group bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-8 hover:shadow-2xl transition-all duration-500 cursor-pointer relative overflow-hidden"
                     role="button"
                     tabIndex={0}
-                    style={{ contain: 'content' }}
                   >
-                    <div className="absolute top-0 left-0 w-full h-1 bg-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/0 to-purple-500/0 group-hover:from-indigo-500/10 group-hover:to-purple-500/10 transition-all duration-500"></div>
                     <div className="flex justify-between items-start mb-6">
-                      <span className="px-4 py-1.5 text-sm font-semibold rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100">
-                        Roadmap
-                      </span>
-                      <FileText className="text-indigo-600" size={24} aria-hidden="true" />
+                      <span className="px-4 py-2 text-sm font-semibold rounded-full bg-indigo-500/10 text-indigo-600">Roadmap</span>
+                      <Map className="text-indigo-500" size={28} aria-hidden="true" />
                     </div>
-                    
-                    <h3 className="text-2xl font-bold text-slate-900 mb-4 capitalize">
-                      {roadmap.roadmap_name}
-                    </h3>
-                    
-                    <p className="text-slate-600 mb-8 text-lg leading-relaxed line-clamp-3">
-                      {roadmap.roadmap_description || "Start your learning journey with this structured roadmap."}
-                    </p>
-                    
-                    <button 
-                      className="w-full px-6 py-4 bg-[#EB5A3C] text-white rounded-xl hover:bg-indigo-600 transition-colors duration-300 font-medium flex items-center justify-center gap-2 text-lg group-hover:bg-indigo-600"
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4 capitalize">{roadmap.roadmap_name}</h3>
+                    <p className="text-gray-600 mb-8 leading-relaxed line-clamp-3">{roadmap.roadmap_description || "Start your learning journey with this structured roadmap."}</p>
+                    <button
+                      className="w-full px-6 py-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 font-medium flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
                       aria-label={`View ${roadmap.roadmap_name} roadmap`}
                     >
                       <span>View Roadmap</span>
-                      <ArrowRight size={20} aria-hidden="true" />
+                      <ArrowRight size={20} aria-hidden="true" className="transform group-hover:translate-x-1 transition-transform duration-300" />
                     </button>
                   </div>
                 ))}
               </div>
             )}
           </Suspense>
-
+          
+          {/* Pagination */}
           {totalPages > 1 && (
             <nav className="flex justify-center items-center gap-3 mt-12" aria-label="Pagination">
               <button
@@ -241,14 +252,14 @@ function Roadmaps() {
                 disabled={currentPage === 1}
                 className={`p-3 rounded-xl border-2 ${
                   currentPage === 1
-                    ? "bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed"
-                    : "bg-white text-slate-700 border-slate-200 hover:border-indigo-600 hover:text-indigo-600"
+                    ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
+                    : "bg-white text-gray-700 border-gray-200 hover:border-indigo-500 hover:text-indigo-500"
                 }`}
                 aria-label="Previous page"
               >
                 <ChevronLeft size={24} aria-hidden="true" />
               </button>
-
+              
               {[...Array(totalPages)].map((_, index) => {
                 const pageNumber = index + 1;
                 const isCurrentPage = pageNumber === currentPage;
@@ -256,22 +267,22 @@ function Roadmaps() {
                   pageNumber === 1 ||
                   pageNumber === totalPages ||
                   Math.abs(pageNumber - currentPage) <= 1;
-
+                  
                 if (!isWithinRange) {
                   if (pageNumber === 2 || pageNumber === totalPages - 1) {
-                    return <span key={pageNumber} className="text-slate-400" aria-hidden="true">•••</span>;
+                    return <span key={pageNumber} className="text-gray-400">•••</span>;
                   }
                   return null;
                 }
-
+                
                 return (
                   <button
                     key={pageNumber}
                     onClick={() => handlePageChange(pageNumber)}
-                    className={`w-12 h-12 rounded-xl text-lg font-medium border-2 ${
+                    className={`w-12 h-12 rounded-xl text-lg font-medium ${
                       isCurrentPage
-                        ? "bg-indigo-600 text-white border-indigo-600"
-                        : "bg-white text-slate-700 border-slate-200 hover:border-indigo-600 hover:text-indigo-600"
+                        ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white border-0"
+                        : "bg-white text-gray-700 border-2 border-gray-200 hover:border-indigo-500 hover:text-indigo-500"
                     }`}
                     aria-label={`Page ${pageNumber}`}
                     aria-current={isCurrentPage ? 'page' : undefined}
@@ -280,14 +291,14 @@ function Roadmaps() {
                   </button>
                 );
               })}
-
+              
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
                 className={`p-3 rounded-xl border-2 ${
                   currentPage === totalPages
-                    ? "bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed"
-                    : "bg-white text-slate-700 border-slate-200 hover:border-indigo-600 hover:text-indigo-600"
+                    ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
+                    : "bg-white text-gray-700 border-gray-200 hover:border-indigo-500 hover:text-indigo-500"
                 }`}
                 aria-label="Next page"
               >

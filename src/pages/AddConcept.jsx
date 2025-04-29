@@ -5,11 +5,12 @@ import { Helmet } from "react-helmet-async";
 import { FileText, AlertCircle, CheckCircle2 } from "lucide-react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import axiosInstance from "../utils/axiosInstance";
 
 function AddConcept() {
   const { token } = useAuth();
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     if (!token) {
       navigate("/");
@@ -29,18 +30,14 @@ function AddConcept() {
   useEffect(() => {
     async function fetchRoadmaps() {
       try {
-        const response = await fetch("http://localhost:7000/roadmaps/roadmapnames", {
+        const response = await axiosInstance.get("/api/roadmaps/roadmapnames", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        if (!response.ok) {
-          throw new Error("Failed to fetch roadmaps");
-        }
-        const data = await response.json();
-        setRoadmaps(data);
+        setRoadmaps(response.data);
       } catch (err) {
-        setError(err.message);
+        setError(err.response?.data?.message || "Failed to fetch roadmaps");
       }
     }
 
@@ -59,24 +56,15 @@ function AddConcept() {
   async function handleSubmit(e) {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:7000/concept/add", {
-        method: "POST",
+      await axiosInstance.post("/api/concept/add", formData, {
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to add concept");
-      }
-
       setSuccess("Concept added successfully!");
       setError("");
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.message || "Failed to add concept");
       setSuccess("");
     }
   }

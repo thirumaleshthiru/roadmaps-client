@@ -3,6 +3,7 @@ import { useAuth } from "../utils/AuthConext";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Map, AlertCircle, CheckCircle2, ArrowRight } from "lucide-react";
+import axiosInstance from "../utils/axiosInstance";
 
 function AddRoadmap() {
   const { token } = useAuth();
@@ -34,21 +35,12 @@ function AddRoadmap() {
     setSuccess("");
   
     try {
-      const response = await fetch("http://localhost:7000/roadmaps/add", {
-        method: "POST",
+      const response = await axiosInstance.post("/api/roadmaps/add", formData, {
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
+          Authorization: `Bearer ${token}`
+        }
       });
-  
-      const responseData = await response.json();
-  
-      if (!response.ok) {
-        throw new Error(responseData.error || "Failed to add roadmap");
-      }
-  
+      
       setSuccess("Roadmap added successfully!");
       setFormData({
         roadmap_name: "",
@@ -57,7 +49,8 @@ function AddRoadmap() {
         meta_description: "",
       });
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.message || err.message || "Failed to add roadmap");
+      console.error("Error adding roadmap:", err);
     }
   }
 

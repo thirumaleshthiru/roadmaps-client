@@ -49,7 +49,7 @@ function AddResource() {
     setSuccess("");
 
     try {
-      const response = await axiosInstance.post("/api/resources/add", formData, {
+        await axiosInstance.post("/api/resources/add", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

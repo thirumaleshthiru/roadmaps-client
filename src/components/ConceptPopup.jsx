@@ -65,7 +65,7 @@ function ConceptPopup({ concept, onClose }) {
       const randomIndex = Math.floor(Math.random() * motivationalQuotes.length);
       setQuote(motivationalQuotes[randomIndex]);
     }
-  }, [concept]);
+  }, [concept, motivationalQuotes]);
 
   // Close when clicking outside
   useEffect(() => {
@@ -91,7 +91,7 @@ function ConceptPopup({ concept, onClose }) {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscapeKey);
     };
-  }, []);
+  }, [handleClose]);
 
   const handleClose = () => {
     setIsAnimating(true);

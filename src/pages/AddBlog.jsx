@@ -52,7 +52,7 @@ function AddBlog() {
     }
 
     try {
-      const response = await axiosInstance.post("/api/blogs/add", formDataToSubmit, {
+      await axiosInstance.post("/api/blogs/add", formDataToSubmit, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

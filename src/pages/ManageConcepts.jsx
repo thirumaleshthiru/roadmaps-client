@@ -54,7 +54,7 @@ function ManageConcepts() {
       }
     }
     fetchConcepts();
-  }, []);
+  }, [activeRoadmap]);
   
   async function handleDelete(conceptId) {
     setError("");

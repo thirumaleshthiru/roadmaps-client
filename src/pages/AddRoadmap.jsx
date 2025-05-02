@@ -35,7 +35,7 @@ function AddRoadmap() {
     setSuccess("");
   
     try {
-      const response = await axiosInstance.post("/api/roadmaps/add", formData, {
+       await axiosInstance.post("/api/roadmaps/add", formData, {
         headers: {
           Authorization: `Bearer ${token}`
         }

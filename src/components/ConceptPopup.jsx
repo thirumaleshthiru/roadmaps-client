@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { X, BookOpen, Link, Check } from 'lucide-react';
 
 function ConceptPopup({ concept, onClose }) {
@@ -6,49 +6,49 @@ function ConceptPopup({ concept, onClose }) {
   const [isAnimating, setIsAnimating] = useState(true);
   const [quote, setQuote] = useState('');
 
-  // Collection of motivational quotes
-  const motivationalQuotes = [
+  // Collection of motivational quotes - wrapped in useMemo to prevent recreation on each render
+  const motivationalQuotes = useMemo(() => [
     "The only way to do great work is to love what you do.",
-  "Believe you can and you're halfway there.",
-  "It always seems impossible until it's done.",
-  "Your attitude determines your direction.",
-  "Success is not final, failure is not fatal: it is the courage to continue that counts.",
-  "The future belongs to those who believe in the beauty of their dreams.",
-  "Don't watch the clock; do what it does. Keep going.",
-  "The only limit to our realization of tomorrow is our doubts of today.",
-  "Strength doesn't come from what you can do. It comes from overcoming the things you once thought you couldn't.",
-  "The harder you work for something, the greater you'll feel when you achieve it.",
-  "Dreams don't work unless you do.",
-  "The only person you are destined to become is the person you decide to be.",
-  "Don't be pushed around by the fears in your mind. Be led by the dreams in your heart.",
-  "The best time to plant a tree was 20 years ago. The second best time is now.",
-  "You don't have to be great to start, but you have to start to be great.",
-  "Every moment is a fresh beginning.",
-  "You are never too old to set another goal or to dream a new dream.",
-  "The only way to achieve the impossible is to believe it is possible.",
-  "Don't let yesterday take up too much of today.",
-  "What you get by achieving your goals is not as important as what you become by achieving your goals.",
-  "Progress isn't always loud—sometimes it's the quiet persistence that wins.",
-  "Every big journey begins with a single brave decision.",
-  "You grow stronger every time you refuse to quit.",
-  "The best view comes after the toughest climb.",
-  "You weren't born to just get by—you were made to rise.",
-  "Even slow steps move you forward if you keep taking them.",
-  "Great things never come from comfort zones.",
-  "Your future is shaped by what you choose to do today.",
-  "Focus on the step in front of you, not the whole staircase.",
-  "You don't need permission to chase what sets your soul on fire.",
-  "Failure is not the opposite of success—it's a part of it.",
-  "Consistency beats intensity when the race is long.",
-  "You can't rewrite the past, but you can shape the ending.",
-  "Effort doesn't always show right away—trust the process.",
-  "Be stronger than your strongest excuse.",
-  "You're always one decision away from a completely different life.",
-  "A dream written down becomes a plan. A plan followed becomes reality.",
-  "Fear is a reaction—courage is a choice.",
-  "The person you want to be is already inside you—keep going.",
-  "You don't have to finish fast. You just have to finish."
-  ];
+    "Believe you can and you're halfway there.",
+    "It always seems impossible until it's done.",
+    "Your attitude determines your direction.",
+    "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+    "The future belongs to those who believe in the beauty of their dreams.",
+    "Don't watch the clock; do what it does. Keep going.",
+    "The only limit to our realization of tomorrow is our doubts of today.",
+    "Strength doesn't come from what you can do. It comes from overcoming the things you once thought you couldn't.",
+    "The harder you work for something, the greater you'll feel when you achieve it.",
+    "Dreams don't work unless you do.",
+    "The only person you are destined to become is the person you decide to be.",
+    "Don't be pushed around by the fears in your mind. Be led by the dreams in your heart.",
+    "The best time to plant a tree was 20 years ago. The second best time is now.",
+    "You don't have to be great to start, but you have to start to be great.",
+    "Every moment is a fresh beginning.",
+    "You are never too old to set another goal or to dream a new dream.",
+    "The only way to achieve the impossible is to believe it is possible.",
+    "Don't let yesterday take up too much of today.",
+    "What you get by achieving your goals is not as important as what you become by achieving your goals.",
+    "Progress isn't always loud—sometimes it's the quiet persistence that wins.",
+    "Every big journey begins with a single brave decision.",
+    "You grow stronger every time you refuse to quit.",
+    "The best view comes after the toughest climb.",
+    "You weren't born to just get by—you were made to rise.",
+    "Even slow steps move you forward if you keep taking them.",
+    "Great things never come from comfort zones.",
+    "Your future is shaped by what you choose to do today.",
+    "Focus on the step in front of you, not the whole staircase.",
+    "You don't need permission to chase what sets your soul on fire.",
+    "Failure is not the opposite of success—it's a part of it.",
+    "Consistency beats intensity when the race is long.",
+    "You can't rewrite the past, but you can shape the ending.",
+    "Effort doesn't always show right away—trust the process.",
+    "Be stronger than your strongest excuse.",
+    "You're always one decision away from a completely different life.",
+    "A dream written down becomes a plan. A plan followed becomes reality.",
+    "Fear is a reaction—courage is a choice.",
+    "The person you want to be is already inside you—keep going.",
+    "You don't have to finish fast. You just have to finish."
+  ], []);
 
   // Handle animation
   useEffect(() => {
@@ -59,6 +59,14 @@ function ConceptPopup({ concept, onClose }) {
     }
   }, [concept]);
 
+  // Use useCallback to memoize the handleClose function
+  const handleClose = useCallback(() => {
+    setIsAnimating(true);
+    setTimeout(() => {
+      onClose();
+    }, 200);
+  }, [onClose]);
+
   // Select a random quote when component mounts or concept changes
   useEffect(() => {
     if (concept) {
@@ -66,13 +74,6 @@ function ConceptPopup({ concept, onClose }) {
       setQuote(motivationalQuotes[randomIndex]);
     }
   }, [concept, motivationalQuotes]);
-
-  const handleClose = () => {
-    setIsAnimating(true);
-    setTimeout(() => {
-      onClose();
-    }, 200);
-  };
 
   // Close when clicking outside
   useEffect(() => {
@@ -98,7 +99,7 @@ function ConceptPopup({ concept, onClose }) {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscapeKey);
     };
-  }, [onClose]);
+  }, [handleClose]); // Added handleClose to dependencies
 
   if (!concept) return null;
 

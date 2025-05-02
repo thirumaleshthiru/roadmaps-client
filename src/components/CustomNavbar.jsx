@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, ArrowRight } from 'lucide-react';
+import { Menu, X} from 'lucide-react';
 import { useAuth } from '../utils/AuthConext';
 
 function CustomNavbar() {

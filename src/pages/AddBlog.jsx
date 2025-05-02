@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { FileText, Image, AlignLeft, Type } from "lucide-react";
+import { FileText, Image,  Type } from "lucide-react";
 import axiosInstance from "../utils/axiosInstance";
 
 function AddBlog() {

@@ -3,7 +3,7 @@ import { useAuth } from "../utils/AuthConext";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { 
-  FileText, 
+ 
   Plus, 
   BookOpen, 
   Map, 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, ArrowRight } from 'lucide-react';
+import { Check} from 'lucide-react';
 
 function Concept({ concept, index, onClick, marked, onMarkToggle, totalConcepts }) {
   const isEven = index % 2 === 0;

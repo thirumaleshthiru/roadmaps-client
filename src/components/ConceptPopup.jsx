@@ -67,6 +67,13 @@ function ConceptPopup({ concept, onClose }) {
     }
   }, [concept, motivationalQuotes]);
 
+  const handleClose = () => {
+    setIsAnimating(true);
+    setTimeout(() => {
+      onClose();
+    }, 200);
+  };
+
   // Close when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -91,14 +98,7 @@ function ConceptPopup({ concept, onClose }) {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscapeKey);
     };
-  }, [handleClose]);
-
-  const handleClose = () => {
-    setIsAnimating(true);
-    setTimeout(() => {
-      onClose();
-    }, 200);
-  };
+  }, [onClose]);
 
   if (!concept) return null;
 

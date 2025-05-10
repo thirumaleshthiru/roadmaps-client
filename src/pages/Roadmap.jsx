@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { useCurrentLocation } from '../utils/useFulFunctions.js';
 import { ChevronRight, Award, Book } from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
-import { Link } from 'lucide-react';
+import { Link } from 'react-router-dom';
  import Concept from '../components/Concept';
 import ConceptPopup from '../components/ConceptPopup';
 

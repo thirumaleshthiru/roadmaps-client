@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { useCurrentLocation } from '../utils/useFulFunctions.js';
 import { ChevronRight, Award, Book } from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
-
+import { Link } from 'lucide-react';
  import Concept from '../components/Concept';
 import ConceptPopup from '../components/ConceptPopup';
 
@@ -123,7 +123,7 @@ function Roadmap() {
         <div className="flex items-center space-x-2 text-sm text-gray-600 mb-8">
           <a href="/" className="hover:text-indigo-600 transition-colors">Home</a>
           <ChevronRight size={16} />
-          <a href="/roadmaps" className="hover:text-indigo-600 transition-colors">Roadmaps</a>
+          <Link href="/roadmaps" className="hover:text-indigo-600 transition-colors">Roadmaps</Link>
           <ChevronRight size={16} />
           <span className="font-medium text-indigo-600">{roadmap.roadmap_name}</span>
         </div>

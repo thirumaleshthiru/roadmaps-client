@@ -16,7 +16,7 @@ function CustomNavbar() {
       <div className="container mx-auto px-6 flex items-center justify-between h-20 gap-6 font-medium">
         <Link to="/" className="text-2xl font-bold flex items-center">
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
-            Pathly
+            RoadmapsHub
           </span>
         </Link>
         

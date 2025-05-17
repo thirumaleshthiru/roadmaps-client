@@ -1,5 +1,5 @@
 import React from "react";
-
+ import {Link} from 'react-router-dom';
 const Footer = () => {
   return (
     <footer className="bg-gray-900 py-10 text-white">
@@ -13,31 +13,36 @@ const Footer = () => {
               programming, data science, and design.
             </p>
           </div>
-
+          
           {/* Quick Links */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="text-sm text-gray-400 space-y-2">
               <li>
-                <a href="/roadmaps" className="hover:text-white">Explore Roadmaps</a>
+                <Link href="/roadmaps" className="hover:text-white">
+                  Explore Roadmaps
+                </Link>
               </li>
               <li>
-                <a href="/blog" className="hover:text-white">Blog</a>
+                <Link href="/blog" className="hover:text-white">
+                  Blog
+                </Link>
               </li>
               <li>
-                <a href="/resources" className="hover:text-white">Resources</a>
+                <Link href="/resources" className="hover:text-white">
+                  Resources
+                </Link>
               </li>
             </ul>
           </div>
-
+          
           {/* Contact Section */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
             <p className="text-sm text-gray-400">Email: methirumaleshgandam@gmail.com</p>
-        
           </div>
         </div>
-
+        
         <div className="mt-8 text-center text-xs text-gray-500">
           <p>&copy; 2025 Pathly. All Rights Reserved.</p>
         </div>

@@ -14,8 +14,8 @@ import {
   Award
 } from "lucide-react";
 import { Link } from "react-router-dom";
-
-const Home = () => {
+import HeroBanner from "../assets/hero-banner.webp";
+ const Home = () => {
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900 font-sans">
       {/* Header Hero */}
@@ -69,7 +69,7 @@ const Home = () => {
                 <div className="relative bg-white rounded-3xl shadow-2xl p-2 border border-zinc-100 transform -rotate-2 transition-all hover:rotate-0 duration-300">
                   <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-t-3xl"></div>
                   <div className="rounded-2xl overflow-hidden border border-zinc-100">
-                    <img src="/assets/roadmaps-page.png" alt="Java Roadmap" className="w-full" />
+                    <img src={HeroBanner} alt="Java Roadmap" className="w-full" />
                   </div>
                 </div>
               </div>

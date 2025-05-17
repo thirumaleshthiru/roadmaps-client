@@ -11,10 +11,10 @@ function Concept({ concept, index, onClick, marked, onMarkToggle, totalConcepts 
       id={`concept-${concept.concept_id}`}
     >
       {/* Main Content Card */}
-      <div className={`w-full md:w-5/12 px-4 mb-6 md:mb-0 z-10`}>
+      <div className={`w-full md:w-5/12 px-1 mb-6 md:mb-0 z-10`}>
         <div 
           className={`
-            p-6 rounded-xl shadow-lg bg-white cursor-pointer 
+            p-3 rounded-xl shadow-lg bg-white cursor-pointer 
             transform transition-all duration-300 
             hover:scale-102 hover:shadow-2xl 
             ${marked ? 'border-l-4 border-green-500' : 'border-l-4 border-transparent'} 

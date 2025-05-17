@@ -5,7 +5,7 @@ function App() {
   return (
     <div className="flex flex-col min-h-screen">
       <CustomNavbar />
-        <div className="flex-0 mt-10">
+        <div className="flex-0 mt-1">
         <Routex />
 
         </div>

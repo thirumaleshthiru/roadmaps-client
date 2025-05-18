@@ -124,7 +124,7 @@ function Roadmap() {
         <div className="flex items-center space-x-2 text-sm text-gray-600 mb-8">
           <a href="/" className="hover:text-indigo-600 transition-colors">Home</a>
           <ChevronRight size={16} />
-           <Link href="/roadmaps" className="hover:text-indigo-600 transition-colors">Roadmaps</Link>
+           <Link to="/roadmaps" className="hover:text-indigo-600 transition-colors">Roadmaps</Link>
   
           <ChevronRight size={16} />
           <span className="font-medium text-indigo-600">{roadmap.roadmap_name}</span>

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { X, BookOpen, Link, Check } from 'lucide-react';
 
-function ConceptPopup({ concept, onClose }) {
+function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
   const modalRef = useRef(null);
   const [isAnimating, setIsAnimating] = useState(true);
   const [quote, setQuote] = useState('');
@@ -66,6 +66,17 @@ function ConceptPopup({ concept, onClose }) {
       onClose();
     }, 200);
   }, [onClose]);
+
+  // Handle completing the concept
+  const handleComplete = useCallback(() => {
+    if (onMarkToggle && concept) {
+      onMarkToggle(concept.concept_id);
+      setIsAnimating(true);
+      setTimeout(() => {
+        onClose();
+      }, 200);
+    }
+  }, [concept, onClose, onMarkToggle]);
 
   // Select a random quote when component mounts or concept changes
   useEffect(() => {
@@ -148,11 +159,11 @@ function ConceptPopup({ concept, onClose }) {
         </div>
 
         {/* Footer with Actions and Random Quote */}
-        <div className="p-4 md:p-6 border-t bg-gray-50 flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
+        <div className="p-4 md:p-6 border-t bg-gray-50 flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0 mb-10">
           <div className="text-sm text-gray-600 italic font-medium max-w-md pl-4 border-l-4 border-indigo-300">
             {quote}
           </div>
-          
+          <br />
           <div className="flex space-x-3">
             {concept.resources && (
               <a
@@ -165,6 +176,18 @@ function ConceptPopup({ concept, onClose }) {
                 Resources
               </a>
             )}
+            
+            <button
+              className={`inline-flex items-center px-4 py-2 rounded-md transition-colors ${
+                marked 
+                  ? "bg-green-100 text-green-700 hover:bg-green-200" 
+                  : "bg-green-600 text-white hover:bg-green-700"
+              }`}
+              onClick={handleComplete}
+            >
+              <Check size={16} className="mr-2" />
+              {marked ? "Completed" : "Complete"}
+            </button>
             
             <button
               className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"

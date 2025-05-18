@@ -6,7 +6,7 @@ import { ChevronRight, Award, Book } from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
  
 import { Link } from 'react-router-dom';
- import Concept from '../components/Concept';
+import Concept from '../components/Concept';
 import ConceptPopup from '../components/ConceptPopup';
 
 function Roadmap() {
@@ -67,6 +67,13 @@ function Roadmap() {
     localStorage.setItem('markedConcepts', JSON.stringify(updatedMarkedConcepts));
   };
 
+  // This function specifically handles the mark toggle from the popup
+  const handlePopupMarkToggle = () => {
+    if (selectedConcept) {
+      toggleConceptMark(selectedConcept.concept_id);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -99,6 +106,8 @@ function Roadmap() {
       </div>
     );
   }
+
+  const isConceptMarked = selectedConcept ? markedConcepts.includes(selectedConcept.concept_id) : false;
 
   return (
     <>
@@ -153,7 +162,12 @@ function Roadmap() {
           </div>
         )}
 
-        <ConceptPopup concept={selectedConcept} onClose={handleClosePopup} />
+        <ConceptPopup 
+          concept={selectedConcept} 
+          onClose={handleClosePopup} 
+          marked={isConceptMarked}
+          onMarkToggle={handlePopupMarkToggle}
+        />
       </div>
     </>
   );

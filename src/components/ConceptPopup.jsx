@@ -159,7 +159,7 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
         </div>
 
         {/* Footer with Actions and Random Quote */}
-        <div className="p-4 md:p-6 border-t bg-gray-50 flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0 mb-10">
+        <div className="p-4 md:p-6 border-t bg-gray-50 flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
           <div className="text-sm text-gray-600 italic font-medium max-w-md pl-4 border-l-4 border-indigo-300">
             {quote}
           </div>

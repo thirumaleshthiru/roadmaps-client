@@ -1,19 +1,15 @@
 import React, { useState, useRef } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { useCurrentLocation } from '../utils/useFulFunctions.js';
-import { ChevronRight, FileText, Upload, Search, Award, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
+import { ChevronRight, FileText, Upload, Search, Award, AlertCircle, CheckCircle} from 'lucide-react';
+import { pdfjs } from 'react-pdf';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { Link } from 'react-router-dom';
-import { Document, Page, pdfjs } from 'react-pdf';
 
-// Initialize PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+// Initialize PDF.js worker - fixed to use unpkg instead of cdnjs
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 // Initialize Google Generative AI
 const genAI = new GoogleGenerativeAI('AIzaSyBmU-6zbaAKVpc8biv_NnA6opYJ5AER5HA');
 
 function AIAtsChecker() {
-  const [currentUrl] = useCurrentLocation();
   const [resumeText, setResumeText] = useState('');
   const [jobDescription, setJobDescription] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -214,15 +210,6 @@ function AIAtsChecker() {
 
   return (
     <>
-      <Helmet>
-        <title>AI ATS Resume Checker | Optimize Your Resume</title>
-        <meta
-          name="description"
-          content="Analyze your resume against job descriptions with our AI-powered ATS checker. Get instant feedback and optimization suggestions."
-        />
-        <link rel="canonical" href={currentUrl} />
-      </Helmet>
-
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl shadow-xl p-8 mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">

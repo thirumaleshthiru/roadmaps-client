@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import{ useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useCurrentLocation } from '../utils/useFulFunctions.js';
-import { ChevronRight, Award, Book, Send, Loader2, Settings } from 'lucide-react';
+import { ChevronRight, Award, Book, Send, Loader2 } from 'lucide-react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
  
 import { Link } from 'react-router-dom';
@@ -21,8 +21,6 @@ function AIGenerated() {
   const [promptInput, setPromptInput] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationProgress, setGenerationProgress] = useState(0);
-  const [showSettings, setShowSettings] = useState(false);
-  const [conceptsCount, setConceptsCount] = useState({ min: 10, max: 15 });
 
   // Load marked concepts for the current roadmap
   const loadMarkedConcepts = (roadmapId) => {
@@ -96,25 +94,20 @@ function AIGenerated() {
               "concept_details": "Detailed HTML content about this concept with headings, paragraphs, lists, etc.",
               "roadmap_id": ${roadmapId}
             }
-            // IMPORTANT: Include ${conceptsCount.min}-${conceptsCount.max} concepts total, covering everything from absolute basics to advanced topics
+            // IMPORTANT: Include 20-25 concepts total, covering everything from absolute basics to advanced topics
           ]
         }
 
         CRITICAL REQUIREMENTS:
-        1. Generate ${conceptsCount.min}-${conceptsCount.max} concepts that cover the COMPLETE learning journey from absolute beginner to advanced practitioner
+        1. Generate 20-25 concepts that cover the COMPLETE learning journey from absolute beginner to advanced practitioner
         2. Each concept must build logically on previous concepts
         3. Include proper HTML formatting in the concept_details field with <h2>, <p>, <ul>, <li>, etc. tags
-        4. Each concept_details should be EXTREMELY COMPREHENSIVE with detailed explanations - treat each concept as a mini-tutorial with approximately 500-1000 words of content
-        5. Include relevant examples, practical applications, exercises, code snippets (when relevant), and common pitfalls to avoid
-        6. For technical topics, include actual code examples with comments explaining each part
-        7. Structure each concept_details with clear headings, subheadings, bullet points, and numbered steps when appropriate
-        8. Include fun facts, historical context, real-world applications, and practical tips
-        9. Ensure the roadmap is professionally written as if created by an expert in ${topic}
-        10. Make sure ALL HTML tags are properly escaped in the JSON (use \\u003C for < and \\u003E for >)
-        11. The first few concepts MUST be suitable for complete beginners with no prior knowledge
-        12. The final concepts should cover advanced topics that professionals would need to know
-        13. For each concept, include a "Practice Exercise" section with actual exercises the learner can complete
-        14. Add a "Resources" section at the end of each concept with recommended books, websites, videos, or tools
+        4. Each concept_details should be comprehensive with detailed explanations
+        5. Include fun facts, code examples when relevant, and practical tips
+        6. Ensure the roadmap is professionally written as if created by an expert in ${topic}
+        7. Make sure ALL HTML tags are properly escaped in the JSON (use \\u003C for < and \\u003E for >)
+        8. The first few concepts MUST be suitable for complete beginners with no prior knowledge
+        9. The final concepts should cover advanced topics that professionals would need to know
         
         Return ONLY the JSON object with no additional text.
       `;
@@ -182,7 +175,6 @@ function AIGenerated() {
     await generateRoadmap(promptInput.trim());
     setIsGenerating(false);
     setPromptInput('');
-    setShowSettings(false);
   };
 
   const handleConceptClick = (concept) => {
@@ -222,21 +214,6 @@ function AIGenerated() {
     return Math.round((markedConcepts.length / roadmap.concepts.length) * 100);
   };
 
-  // Handle concept count change
-  const handleMinConceptsChange = (e) => {
-    const value = parseInt(e.target.value);
-    if (value > 0 && value <= conceptsCount.max) {
-      setConceptsCount(prev => ({ ...prev, min: value }));
-    }
-  };
-
-  const handleMaxConceptsChange = (e) => {
-    const value = parseInt(e.target.value);
-    if (value >= conceptsCount.min && value <= 30) {
-      setConceptsCount(prev => ({ ...prev, max: value }));
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -249,7 +226,7 @@ function AIGenerated() {
               style={{ width: `${generationProgress}%` }}
             ></div>
           </div>
-          <p className="text-sm text-gray-500">Creating {conceptsCount.min}-{conceptsCount.max} detailed learning concepts</p>
+          <p className="text-sm text-gray-500">Creating 20-25 detailed learning concepts</p>
         </div>
       </div>
     );
@@ -290,95 +267,39 @@ function AIGenerated() {
             {roadmap ? roadmap.roadmap_name.toUpperCase() : "AI-GENERATED LEARNING ROADMAPS"}
           </h1>
           <p className="text-md md:text-lg text-indigo-100 mb-6">
-            {roadmap 
-              ? roadmap.roadmap_description 
-              : "Enter any topic below to generate a comprehensive learning roadmap with customizable concepts and detailed mini-tutorials."}
+            {roadmap ? roadmap.roadmap_description : "Enter any topic below to generate a comprehensive learning roadmap with 20-25 concepts."}
           </p>
           
-          <form onSubmit={handleGenerateRoadmap} className="flex flex-col gap-4">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <input
-                type="text"
-                value={promptInput}
-                onChange={(e) => setPromptInput(e.target.value)}
-                placeholder="Enter a topic (e.g., Python, Machine Learning, Web Development)"
-                className="flex-grow p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-white"
-                disabled={isGenerating}
-              />
-              <div className="flex gap-2 md:flex-row flex-col">
-                <button
-                  type="button"
-                  onClick={() => setShowSettings(!showSettings)}
-                  className="p-3 rounded-lg text-white bg-indigo-800 hover:bg-indigo-900 flex items-center justify-center"
-                  disabled={isGenerating}
-                >
-                  <Settings size={20} />
-                </button>
-                <button
-                  type="submit"
-                  disabled={isGenerating || !promptInput.trim()}
-                  className={`p-3 rounded-lg text-white flex items-center justify-center flex-grow ${
-                    isGenerating || !promptInput.trim()
-                      ? 'bg-indigo-400 cursor-not-allowed'
-                      : 'bg-indigo-700 hover:bg-indigo-800'
-                  }`}
-                >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 size={20} className="animate-spin mr-2" />
-                      <span>Generating...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Send size={20} className="mr-2" />
-                      <span>{roadmap ? "Generate New Roadmap" : "Generate Roadmap"}</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-            
-            {showSettings && (
-              <div className="bg-white p-4 rounded-lg shadow-md">
-                <h3 className="text-gray-700 font-semibold mb-3">Roadmap Settings</h3>
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-600 mb-1">Minimum Concepts</label>
-                    <div className="flex items-center">
-                      <input
-                        type="range"
-                        min="5"
-                        max={conceptsCount.max}
-                        value={conceptsCount.min}
-                        onChange={handleMinConceptsChange}
-                        className="w-full mr-3"
-                        disabled={isGenerating}
-                      />
-                      <span className="w-8 text-center">{conceptsCount.min}</span>
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-600 mb-1">Maximum Concepts</label>
-                    <div className="flex items-center">
-                      <input
-                        type="range"
-                        min={conceptsCount.min}
-                        max="30"
-                        value={conceptsCount.max}
-                        onChange={handleMaxConceptsChange}
-                        className="w-full mr-3"
-                        disabled={isGenerating}
-                      />
-                      <span className="w-8 text-center">{conceptsCount.max}</span>
-                    </div>
-                  </div>
-                </div>
-                <p className="text-xs text-gray-500 mt-2">
-                  The AI will generate between {conceptsCount.min} and {conceptsCount.max} detailed concepts for your roadmap.
-                  Each concept will include comprehensive content, practice exercises, and recommended resources.
-                </p>
-              </div>
-            )}
+          <form onSubmit={handleGenerateRoadmap} className="flex flex-col sm:flex-row gap-4">
+            <input
+              type="text"
+              value={promptInput}
+              onChange={(e) => setPromptInput(e.target.value)}
+              placeholder="Enter a topic (e.g., Python, Machine Learning, Web Development)"
+              className="flex-grow p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-white"
+              disabled={isGenerating}
+            />
+            <button
+              type="submit"
+              disabled={isGenerating || !promptInput.trim()}
+              className={`p-3 rounded-lg text-white flex items-center justify-center ${
+                isGenerating || !promptInput.trim()
+                  ? 'bg-indigo-400 cursor-not-allowed'
+                  : 'bg-indigo-700 hover:bg-indigo-800'
+              }`}
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 size={20} className="animate-spin mr-2" />
+                  <span>Generating...</span>
+                </>
+              ) : (
+                <>
+                  <Send size={20} className="mr-2" />
+                  <span>{roadmap ? "Generate New Roadmap" : "Generate Roadmap"}</span>
+                </>
+              )}
+            </button>
           </form>
         </div>
 
@@ -411,7 +332,7 @@ function AIGenerated() {
 
             {roadmap.concepts && roadmap.concepts.length > 0 ? (
               <div className="relative p-6">
-                <div className="flex md:items-center md:flex-row flex-col justify-between mb-8">
+                <div className="flex items-center justify-between mb-8">
                   <div className="flex items-center">
                     <Award className="text-indigo-500 mr-2" size={24} />
                     <h2 className="text-2xl font-semibold text-gray-800">Learning Path</h2>
@@ -450,18 +371,9 @@ function AIGenerated() {
             <p className="text-center text-lg text-gray-600 mb-4">
               Enter any topic above to generate a comprehensive learning roadmap.
             </p>
-            <p className="text-center text-md text-gray-500 mb-4">
-              Our AI will create a detailed step-by-step guide with {conceptsCount.min}-{conceptsCount.max} concepts to help you master your chosen subject from basics to advanced topics.
+            <p className="text-center text-md text-gray-500">
+              Our AI will create a detailed step-by-step guide with 20-25 concepts to help you master your chosen subject from basics to advanced topics.
             </p>
-            <div className="flex items-center justify-center">
-              <button 
-                onClick={() => setShowSettings(!showSettings)}
-                className="flex items-center text-indigo-600 hover:text-indigo-800 transition-colors"
-              >
-                <Settings size={16} className="mr-1" />
-                <span>Customize your roadmap settings</span>
-              </button>
-            </div>
           </div>
         )}
       </div>

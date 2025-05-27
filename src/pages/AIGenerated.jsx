@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
+ import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useCurrentLocation } from '../utils/useFulFunctions.js';
 import { ChevronRight, Award, Book, Send, Loader2, X, BookOpen, ExternalLink, Check } from 'lucide-react';
@@ -208,32 +208,62 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
   const formatContent = (content) => {
     if (!content) return '';
     
-    // Split content into paragraphs and format
-    const paragraphs = content.split('\n\n').filter(p => p.trim());
+    // Split content into sections
+    const sections = content.split('\n\n').filter(s => s.trim());
     
-    return paragraphs.map((paragraph, index) => {
-      const trimmed = paragraph.trim();
+    return sections.map((section, index) => {
+      const trimmed = section.trim();
       
-      // Check if it's a heading (lines that are short and don't end with punctuation)
-      if (trimmed.length < 100 && !trimmed.endsWith('.') && !trimmed.endsWith('!') && !trimmed.endsWith('?') && !trimmed.includes(':')) {
+      // Check if it's "Brief Summary:" section
+      if (trimmed.startsWith('Brief Summary:')) {
+        const summaryText = trimmed.replace('Brief Summary:', '').trim();
         return (
-          <h3 key={index} className="text-lg font-semibold text-gray-800 mb-3 mt-4">
-            {trimmed}
-          </h3>
+          <div key={index} className="mb-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Brief Summary</h3>
+            <p className="text-gray-700 leading-relaxed bg-blue-50 p-4 rounded-lg">
+              {summaryText}
+            </p>
+          </div>
         );
       }
       
-      // Check if it's a list item (starts with -, *, or number)
-      if (trimmed.match(/^[-*•]\s/) || trimmed.match(/^\d+\.\s/)) {
-        const listItems = trimmed.split('\n').filter(item => item.trim());
+      // Check if it's "Key Concepts:" section
+      if (trimmed.startsWith('Key Concepts:')) {
+        const conceptsText = trimmed.replace('Key Concepts:', '').trim();
+        const concepts = conceptsText.split('\n').filter(c => c.trim()).map(c => c.replace(/^[-•*]\s*/, ''));
         return (
-          <ul key={index} className="list-disc list-inside mb-4 ml-4">
-            {listItems.map((item, itemIndex) => (
-              <li key={itemIndex} className="mb-1 text-gray-700">
-                {item.replace(/^[-*•]\s/, '').replace(/^\d+\.\s/, '')}
-              </li>
-            ))}
-          </ul>
+          <div key={index} className="mb-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Key Concepts</h3>
+            <ul className="space-y-2">
+              {concepts.map((concept, conceptIndex) => (
+                <li key={conceptIndex} className="flex items-start">
+                  <span className="text-indigo-500 mr-2">•</span>
+                  <span className="text-gray-700">{concept}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      }
+      
+      // Check if it's "Examples:" section
+      if (trimmed.startsWith('Examples:')) {
+        const examplesText = trimmed.replace('Examples:', '').trim();
+        const examples = examplesText.split('\n').filter(e => e.trim()).map(e => e.replace(/^[-•*]\s*/, ''));
+        return (
+          <div key={index} className="mb-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Examples</h3>
+            <div className="bg-green-50 p-4 rounded-lg">
+              <ul className="space-y-2">
+                {examples.map((example, exampleIndex) => (
+                  <li key={exampleIndex} className="flex items-start">
+                    <span className="text-green-600 mr-2">→</span>
+                    <span className="text-gray-700">{example}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         );
       }
       
@@ -419,7 +449,7 @@ function AIGenerated() {
               "concept_id": 1,
               "concept_name": "Introduction to ${topic}",
               "concept_description": "A brief overview of what ${topic} is and why it matters",
-              "concept_details": "Detailed plain text content about this concept. Include comprehensive explanations, examples, and practical tips. Use clear paragraphs separated by double line breaks. Include headings on separate lines. Make lists with bullet points or numbers on separate lines.",
+              "concept_details": "Brief Summary:\nA very brief and comprehensive summary of this concept in 2-3 sentences.\n\nKey Concepts:\n- First key concept\n- Second key concept\n- Third key concept\n- Fourth key concept\n\nExamples:\n- Practical example 1\n- Practical example 2\n- Practical example 3",
               "roadmap_id": ${roadmapId}
             }
             // IMPORTANT: Include 20-25 concepts total, covering everything from absolute basics to advanced topics
@@ -429,14 +459,18 @@ function AIGenerated() {
         CRITICAL REQUIREMENTS:
         1. Generate 20-25 concepts that cover the COMPLETE learning journey from absolute beginner to advanced practitioner
         2. Each concept must build logically on previous concepts
-        3. Use PLAIN TEXT ONLY in the concept_details field - NO HTML tags whatsoever
-        4. Each concept_details should be comprehensive with detailed explanations in plain text
-        5. Include practical examples, tips, and explanations in natural language
-        6. Ensure the roadmap is professionally written as if created by an expert in ${topic}
-        7. The first few concepts MUST be suitable for complete beginners with no prior knowledge
-        8. The final concepts should cover advanced topics that professionals would need to know
-        9. Format text naturally with proper paragraph breaks using double newlines
-        10. Use clear, readable plain text formatting without any markup
+        3. For concept_details, use ONLY this exact format:
+           - Brief Summary: 2-3 sentences maximum - very brief but comprehensive
+           - Key Concepts: 4-6 bullet points of the most important concepts
+           - Examples: 3-4 practical examples or use cases
+        4. Keep everything concise and focused - no lengthy explanations
+        5. The first few concepts MUST be suitable for complete beginners with no prior knowledge
+        6. The final concepts should cover advanced topics that professionals would need to know
+        7. Each section should be separated by double newlines
+        8. Use simple bullet points with dashes for lists
+        9. Make sure Brief Summary is truly brief but covers the essence of the concept
+        10. Key Concepts should be the core things someone needs to understand
+        11. Examples should be practical, real-world applications or use cases
         
         Return ONLY the JSON object with no additional text or formatting.
       `;
@@ -663,7 +697,7 @@ function AIGenerated() {
 
             {roadmap.concepts && roadmap.concepts.length > 0 ? (
               <div className="relative p-6">
-                <div className="flex md:items-center flex-col md:flex-row gap-3 justify-between mb-8">
+                <div className="flex items-center justify-between mb-8">
                   <div className="flex items-center">
                     <Award className="text-indigo-500 mr-2" size={24} />
                     <h2 className="text-2xl font-semibold text-gray-800">Learning Path</h2>

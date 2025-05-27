@@ -1,12 +1,340 @@
-import{ useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useCurrentLocation } from '../utils/useFulFunctions.js';
-import { ChevronRight, Award, Book, Send, Loader2 } from 'lucide-react';
+import { ChevronRight, Award, Book, Send, Loader2, X, BookOpen, ExternalLink, Check } from 'lucide-react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
- 
 import { Link } from 'react-router-dom';
-import Concept from '../components/Concept';
-import ConceptPopup from '../components/ConceptPopup';
+
+function Concept({ concept, index, onClick, marked, onMarkToggle, totalConcepts }) {
+  const isEven = index % 2 === 0;
+  const isLast = index === totalConcepts - 1;
+
+  return (
+    <div
+      className={`flex flex-col ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'} items-center mb-16 relative`}
+      id={`concept-${concept.concept_id}`}
+    >
+      {/* Main Content Card */}
+      <div className={`w-full md:w-5/12 px-1 mb-6 md:mb-0 z-10`}>
+        <div 
+          className={`
+            p-3 rounded-xl bg-white cursor-pointer 
+            transform transition-all duration-300 
+            hover:scale-102 hover:shadow-2xl 
+            ${marked ? 'border-l-4 border-green-500' : 'border-l-4 border-transparent'} 
+            relative overflow-hidden
+            shadow-[0_3px_10px_rgb(0,0,0,0.2)]
+          `}
+          onClick={onClick}
+        >
+          {/* Concept Title */}
+          <h3 className="text-xl font-bold text-gray-800 mb-3 pr-8">
+            {concept.concept_name}
+          </h3>
+          
+          {/* Progress Indicator */}
+          {marked && (
+            <div className="absolute top-0 right-0 bg-green-500 text-white p-2 rounded-bl-lg">
+              <Check size={16} />
+            </div>
+          )}
+          
+          {/* Concept Description */}
+          <p className="text-gray-600 text-sm md:text-base">
+            {concept.concept_description?.substring(0, 120)}
+            {concept.concept_description?.length > 120 ? '...' : ''}
+          </p>
+          
+          {/* Card Footer */}
+          <div className="mt-4 flex items-center justify-between text-sm">
+            <span className="text-indigo-600 font-medium flex items-center">
+              Learn more
+            </span>
+            
+            <span className="text-gray-500">
+              {marked ? 'Completed' : 'Not started'}
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      {/* Center Timeline Marker */}
+      <div className="w-full md:w-2/12 flex justify-center relative">
+        <button
+          className={`
+            w-12 h-12 rounded-full 
+            ${marked ? 'bg-green-500' : 'bg-white border-2 border-indigo-500'} 
+            shadow-lg z-20 flex items-center justify-center 
+            cursor-pointer transition-all duration-300 
+            hover:scale-110 focus:outline-none
+          `}
+          onClick={onMarkToggle}
+          aria-label={marked ? 'Mark as incomplete' : 'Mark as complete'}
+        >
+          {marked ? (
+            <Check className="text-white" size={20} />
+          ) : (
+            <span className="font-bold text-indigo-500">{index + 1}</span>
+          )}
+        </button>
+        
+        {/* Timeline Connector */}
+        {!isLast && (
+          <div 
+            className={`absolute ${isEven ? 'top-12' : 'bottom-12'} left-1/2 transform -translate-x-1/2 w-1 h-16 bg-indigo-200`}
+            style={{ zIndex: -1 }}
+          ></div>
+        )}
+      </div>
+      
+      {/* Empty Space for Layout */}
+      <div className="w-full md:w-5/12"></div>
+    </div>
+  );
+}
+
+function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
+  const modalRef = useRef(null);
+  const [isAnimating, setIsAnimating] = useState(true);
+  const [quote, setQuote] = useState('');
+
+  // Collection of motivational quotes - wrapped in useMemo to prevent recreation on each render
+  const motivationalQuotes = useMemo(() => [
+    "The only way to do great work is to love what you do.",
+    "Believe you can and you're halfway there.",
+    "It always seems impossible until it's done.",
+    "Your attitude determines your direction.",
+    "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+    "The future belongs to those who believe in the beauty of their dreams.",
+    "Don't watch the clock; do what it does. Keep going.",
+    "The only limit to our realization of tomorrow is our doubts of today.",
+    "Strength doesn't come from what you can do. It comes from overcoming the things you once thought you couldn't.",
+    "The harder you work for something, the greater you'll feel when you achieve it.",
+    "Dreams don't work unless you do.",
+    "The only person you are destined to become is the person you decide to be.",
+    "Don't be pushed around by the fears in your mind. Be led by the dreams in your heart.",
+    "The best time to plant a tree was 20 years ago. The second best time is now.",
+    "You don't have to be great to start, but you have to start to be great.",
+    "Every moment is a fresh beginning.",
+    "You are never too old to set another goal or to dream a new dream.",
+    "The only way to achieve the impossible is to believe it is possible.",
+    "Don't let yesterday take up too much of today.",
+    "What you get by achieving your goals is not as important as what you become by achieving your goals.",
+    "Progress isn't always loud—sometimes it's the quiet persistence that wins.",
+    "Every big journey begins with a single brave decision.",
+    "You grow stronger every time you refuse to quit.",
+    "The best view comes after the toughest climb.",
+    "You weren't born to just get by—you were made to rise.",
+    "Even slow steps move you forward if you keep taking them.",
+    "Great things never come from comfort zones.",
+    "Your future is shaped by what you choose to do today.",
+    "Focus on the step in front of you, not the whole staircase.",
+    "You don't need permission to chase what sets your soul on fire.",
+    "Failure is not the opposite of success—it's a part of it.",
+    "Consistency beats intensity when the race is long.",
+    "You can't rewrite the past, but you can shape the ending.",
+    "Effort doesn't always show right away—trust the process.",
+    "Be stronger than your strongest excuse.",
+    "You're always one decision away from a completely different life.",
+    "A dream written down becomes a plan. A plan followed becomes reality.",
+    "Fear is a reaction—courage is a choice.",
+    "The person you want to be is already inside you—keep going.",
+    "You don't have to finish fast. You just have to finish."
+  ], []);
+
+  // Handle animation
+  useEffect(() => {
+    if (concept) {
+      setIsAnimating(true);
+      const timer = setTimeout(() => setIsAnimating(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [concept]);
+
+  // Use useCallback to memoize the handleClose function
+  const handleClose = useCallback(() => {
+    setIsAnimating(true);
+    setTimeout(() => {
+      onClose();
+    }, 200);
+  }, [onClose]);
+
+  // Handle completing the concept
+  const handleComplete = useCallback(() => {
+    if (onMarkToggle && concept) {
+      onMarkToggle(concept.concept_id);
+      setIsAnimating(true);
+      setTimeout(() => {
+        onClose();
+      }, 200);
+    }
+  }, [concept, onClose, onMarkToggle]);
+
+  // Select a random quote when component mounts or concept changes
+  useEffect(() => {
+    if (concept) {
+      const randomIndex = Math.floor(Math.random() * motivationalQuotes.length);
+      setQuote(motivationalQuotes[randomIndex]);
+    }
+  }, [concept, motivationalQuotes]);
+
+  // Close when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
+        handleClose();
+      }
+    };
+
+    // Close with escape key
+    const handleEscapeKey = (event) => {
+      if (event.key === 'Escape') {
+        handleClose();
+      }
+    };
+
+    // Add event listeners
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscapeKey);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [handleClose]);
+
+  // Function to format plain text content with basic styling
+  const formatContent = (content) => {
+    if (!content) return '';
+    
+    // Split content into paragraphs and format
+    const paragraphs = content.split('\n\n').filter(p => p.trim());
+    
+    return paragraphs.map((paragraph, index) => {
+      const trimmed = paragraph.trim();
+      
+      // Check if it's a heading (lines that are short and don't end with punctuation)
+      if (trimmed.length < 100 && !trimmed.endsWith('.') && !trimmed.endsWith('!') && !trimmed.endsWith('?') && !trimmed.includes(':')) {
+        return (
+          <h3 key={index} className="text-lg font-semibold text-gray-800 mb-3 mt-4">
+            {trimmed}
+          </h3>
+        );
+      }
+      
+      // Check if it's a list item (starts with -, *, or number)
+      if (trimmed.match(/^[-*•]\s/) || trimmed.match(/^\d+\.\s/)) {
+        const listItems = trimmed.split('\n').filter(item => item.trim());
+        return (
+          <ul key={index} className="list-disc list-inside mb-4 ml-4">
+            {listItems.map((item, itemIndex) => (
+              <li key={itemIndex} className="mb-1 text-gray-700">
+                {item.replace(/^[-*•]\s/, '').replace(/^\d+\.\s/, '')}
+              </li>
+            ))}
+          </ul>
+        );
+      }
+      
+      // Regular paragraph
+      return (
+        <p key={index} className="mb-4 text-gray-700 leading-relaxed">
+          {trimmed}
+        </p>
+      );
+    });
+  };
+
+  if (!concept) return null;
+
+  return (
+    <div 
+      className={`
+        fixed inset-0 bg-black bg-opacity-60 
+        flex items-center justify-center z-50 p-4
+        transition-opacity duration-300
+        ${isAnimating ? 'opacity-0' : 'opacity-100'}
+      `}
+    >
+      <div
+        ref={modalRef}
+        className={`
+          bg-white rounded-2xl shadow-2xl 
+          w-full max-w-4xl max-h-[90vh] overflow-hidden
+          flex flex-col transition-transform duration-300
+          ${isAnimating ? 'scale-95' : 'scale-100'}
+        `}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 md:p-6 border-b">
+          <div className="flex items-center space-x-3">
+            <BookOpen className="text-indigo-500 hidden sm:block" size={24} />
+            <h2 className="text-xl font-bold text-gray-800 truncate pr-2">
+              {concept.concept_name}
+            </h2>
+          </div>
+          
+          <button
+            className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-600"
+            onClick={handleClose}
+            aria-label="Close"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-4 md:p-6 overflow-y-auto flex-grow">
+          <div className="prose prose-indigo max-w-none">
+            {formatContent(concept.concept_details)}
+          </div>
+        </div>
+
+        {/* Footer with Actions and Random Quote */}
+        <div className="p-4 md:p-6 border-t bg-gray-50 flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
+          <div className="text-sm text-gray-600 italic font-medium max-w-md pl-4 border-l-4 border-indigo-300">
+            {quote}
+          </div>
+          
+          <div className="flex space-x-3">
+            {concept.resources && (
+              <a
+                href={concept.resources}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-4 py-2 bg-indigo-50 text-indigo-600 rounded-md hover:bg-indigo-100 transition-colors"
+              >
+                <ExternalLink size={16} className="mr-2" />
+                Resources
+              </a>
+            )}
+            
+            <button
+              className={`inline-flex items-center px-4 py-2 rounded-md transition-colors ${
+                marked 
+                  ? "bg-green-100 text-green-700 hover:bg-green-200" 
+                  : "bg-green-600 text-white hover:bg-green-700"
+              }`}
+              onClick={handleComplete}
+            >
+              <Check size={16} className="mr-2" />
+              {marked ? "Completed" : "Complete"}
+            </button>
+            
+            <button
+              className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+              onClick={handleClose}
+            >
+              <Check size={16} className="mr-2" />
+              Got it
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // Initialize Google Generative AI
 const genAI = new GoogleGenerativeAI('AIzaSyBmU-6zbaAKVpc8biv_NnA6opYJ5AER5HA');
@@ -91,7 +419,7 @@ function AIGenerated() {
               "concept_id": 1,
               "concept_name": "Introduction to ${topic}",
               "concept_description": "A brief overview of what ${topic} is and why it matters",
-              "concept_details": "Detailed HTML content about this concept with headings, paragraphs, lists, etc.",
+              "concept_details": "Detailed plain text content about this concept. Include comprehensive explanations, examples, and practical tips. Use clear paragraphs separated by double line breaks. Include headings on separate lines. Make lists with bullet points or numbers on separate lines.",
               "roadmap_id": ${roadmapId}
             }
             // IMPORTANT: Include 20-25 concepts total, covering everything from absolute basics to advanced topics
@@ -101,15 +429,16 @@ function AIGenerated() {
         CRITICAL REQUIREMENTS:
         1. Generate 20-25 concepts that cover the COMPLETE learning journey from absolute beginner to advanced practitioner
         2. Each concept must build logically on previous concepts
-        3. Include proper HTML formatting in the concept_details field with <h2>, <p>, <ul>, <li>, etc. tags
-        4. Each concept_details should be comprehensive with detailed explanations
-        5. Include fun facts, code examples when relevant, and practical tips
+        3. Use PLAIN TEXT ONLY in the concept_details field - NO HTML tags whatsoever
+        4. Each concept_details should be comprehensive with detailed explanations in plain text
+        5. Include practical examples, tips, and explanations in natural language
         6. Ensure the roadmap is professionally written as if created by an expert in ${topic}
-        7. Make sure ALL HTML tags are properly escaped in the JSON (use \\u003C for < and \\u003E for >)
-        8. The first few concepts MUST be suitable for complete beginners with no prior knowledge
-        9. The final concepts should cover advanced topics that professionals would need to know
+        7. The first few concepts MUST be suitable for complete beginners with no prior knowledge
+        8. The final concepts should cover advanced topics that professionals would need to know
+        9. Format text naturally with proper paragraph breaks using double newlines
+        10. Use clear, readable plain text formatting without any markup
         
-        Return ONLY the JSON object with no additional text.
+        Return ONLY the JSON object with no additional text or formatting.
       `;
 
       setGenerationProgress(30);
@@ -134,7 +463,6 @@ function AIGenerated() {
       } catch (jsonError) {
         console.error('Error parsing AI response:', jsonError);
         console.log('Raw response:', responseText);
-        setError('Failed to generate roadmap. Please try again with a different topic.');
         
         // Try to extract JSON with a more lenient approach
         try {
@@ -154,9 +482,12 @@ function AIGenerated() {
             setRoadmap(roadmapData);
             setError(null);
             setGenerationProgress(100);
+          } else {
+            setError('Failed to generate roadmap. Please try again with a different topic.');
           }
         } catch (fallbackError) {
           console.error('Fallback extraction failed:', fallbackError);
+          setError('Failed to generate roadmap. Please try again with a different topic.');
         }
       }
     } catch (err) {
@@ -332,7 +663,7 @@ function AIGenerated() {
 
             {roadmap.concepts && roadmap.concepts.length > 0 ? (
               <div className="relative p-6">
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex md:items-center flex-col md:flex-row gap-3 justify-between mb-8">
                   <div className="flex items-center">
                     <Award className="text-indigo-500 mr-2" size={24} />
                     <h2 className="text-2xl font-semibold text-gray-800">Learning Path</h2>
@@ -369,7 +700,7 @@ function AIGenerated() {
           <div className="flex flex-col items-center justify-center p-12 bg-white rounded-2xl shadow-lg">
             <Book className="text-indigo-300 mb-4" size={64} />
             <p className="text-center text-lg text-gray-600 mb-4">
-              Enter any topic above to generate a comprehensive learning roadmap.
+              Enterany topic above to generate a comprehensive learning roadmap.
             </p>
             <p className="text-center text-md text-gray-500">
               Our AI will create a detailed step-by-step guide with 20-25 concepts to help you master your chosen subject from basics to advanced topics.

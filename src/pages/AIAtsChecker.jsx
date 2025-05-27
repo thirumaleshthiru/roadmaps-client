@@ -1,13 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { ChevronRight, FileText, Upload, Search, Award, AlertCircle, CheckCircle} from 'lucide-react';
-import { pdfjs } from 'react-pdf';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-// Initialize PDF.js worker - fixed to use unpkg instead of cdnjs
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+import * as mammoth from 'mammoth';
 
 // Initialize Google Generative AI
-const genAI = new GoogleGenerativeAI('AIzaSyBmU-6zbaAKVpc8biv_NnA6opYJ5AER5HA');
+// Note: You'll need to replace this with your actual API key
+const GOOGLE_API_KEY = 'AIzaSyBmU-6zbaAKVpc8biv_NnA6opYJ5AER5HA';
 
 function AIAtsChecker() {
   const [resumeText, setResumeText] = useState('');
@@ -16,8 +13,8 @@ function AIAtsChecker() {
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [error, setError] = useState(null);
-  const [numPages, setNumPages] = useState(null);
   const [fileName, setFileName] = useState('');
+  const [wordCount, setWordCount] = useState(0);
   const fileInputRef = useRef(null);
 
   const handleFileUpload = async (event) => {
@@ -25,51 +22,53 @@ function AIAtsChecker() {
     const file = event.target.files[0];
     
     if (!file) return;
-    if (file.type !== 'application/pdf') {
-      setError('Please upload a PDF file only');
+    
+    // Check if it's a DOCX file
+    const validTypes = [
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/msword'
+    ];
+    
+    if (!validTypes.includes(file.type) && !file.name.toLowerCase().endsWith('.docx')) {
+      setError('Please upload a DOCX file only');
       return;
     }
     
     setFileName(file.name);
     
     try {
-      // Use PDF.js to extract text from the PDF
-      const fileReader = new FileReader();
+      // Use mammoth to extract text from the DOCX file
+      const arrayBuffer = await file.arrayBuffer();
       
-      fileReader.onload = async function() {
-        try {
-          const typedArray = new Uint8Array(this.result);
-          const pdf = await pdfjs.getDocument(typedArray).promise;
-          setNumPages(pdf.numPages);
-          
-          let fullText = '';
-          
-          // Extract text from each page
-          for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const textContent = await page.getTextContent();
-            const textItems = textContent.items.map(item => item.str).join(' ');
-            fullText += textItems + ' ';
-          }
-          
-          setResumeText(fullText);
-        } catch (err) {
-          console.error('Error reading PDF:', err);
-          setError('Failed to extract text from the PDF. Please try another file.');
-        }
-      };
+      const result = await mammoth.extractRawText({ arrayBuffer });
+      const extractedText = result.value;
       
-      fileReader.readAsArrayBuffer(file);
+      if (!extractedText.trim()) {
+        setError('No text content found in the document. Please check your file.');
+        return;
+      }
+      
+      setResumeText(extractedText);
+      setWordCount(extractedText.split(/\s+/).filter(word => word.length > 0).length);
+      
+      if (result.messages && result.messages.length > 0) {
+        console.log('Mammoth messages:', result.messages);
+      }
+      
     } catch (err) {
-      console.error('Error handling file:', err);
-      setError('Failed to process the file. Please try again.');
+      console.error('Error reading DOCX:', err);
+      setError('Failed to extract text from the DOCX file. Please try another file or ensure it\'s a valid Word document.');
     }
   };
 
-  const analyzeResume = async (e) => {
-    e.preventDefault();
+  const analyzeResume = async () => {
     if (!resumeText.trim() || !jobDescription.trim()) {
       setError('Please upload a resume and enter a job description');
+      return;
+    }
+    
+    if (GOOGLE_API_KEY === 'YOUR_GOOGLE_API_KEY_HERE') {
+      setError('Please configure your Google API key to use the analysis feature');
       return;
     }
     
@@ -78,7 +77,6 @@ function AIAtsChecker() {
     setError(null);
     
     try {
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
       setAnalysisProgress(20);
       
       const prompt = `
@@ -92,20 +90,20 @@ function AIAtsChecker() {
         
         Format your response as a JSON object with the following structure:
         {
-          "ats_score": 85, // score out of 100
+          "ats_score": 85,
           "summary": "Brief 2-3 sentence overall assessment",
           "keyword_match": {
-            "score": 80, // score out of 100
+            "score": 80,
             "matched_keywords": ["skill1", "skill2", "experience1"],
             "missing_keywords": ["skill3", "experience2"]
           },
           "format_assessment": {
-            "score": 85, // score out of 100
+            "score": 85,
             "strengths": ["strength1", "strength2"],
             "weaknesses": ["weakness1", "weakness2"]
           },
           "content_quality": {
-            "score": 90, // score out of 100
+            "score": 90,
             "strengths": ["strength1", "strength2"],
             "weaknesses": ["weakness1", "weakness2"]
           },
@@ -114,8 +112,7 @@ function AIAtsChecker() {
               "original": "Original text or section from resume",
               "improved": "Suggested improved version with better keywords/phrasing",
               "explanation": "Why this improvement helps with ATS scanning"
-            },
-            // Include 3-5 specific improvements
+            }
           ]
         }
         
@@ -132,9 +129,34 @@ function AIAtsChecker() {
       `;
 
       setAnalysisProgress(40);
-      const result = await model.generateContent(prompt);
+      
+      // Call Google Generative AI API
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GOOGLE_API_KEY}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: prompt
+            }]
+          }]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
       setAnalysisProgress(70);
-      const responseText = await result.response.text();
+      
+      if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+        throw new Error('Invalid response from AI service');
+      }
+      
+      const responseText = data.candidates[0].content.parts[0].text;
       setAnalysisProgress(90);
       
       try {
@@ -166,7 +188,7 @@ function AIAtsChecker() {
       }
     } catch (err) {
       console.error('Error analyzing resume:', err);
-      setError('Failed to analyze resume. Please try again later.');
+      setError(`Failed to analyze resume: ${err.message}. Please try again later.`);
     } finally {
       setIsAnalyzing(false);
     }
@@ -178,6 +200,7 @@ function AIAtsChecker() {
     setAnalysisResult(null);
     setError(null);
     setFileName('');
+    setWordCount(0);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -216,7 +239,7 @@ function AIAtsChecker() {
             AI-POWERED ATS RESUME CHECKER
           </h1>
           <p className="text-md md:text-lg text-blue-100 mb-6">
-            Upload your resume and paste a job description to get instant ATS compatibility analysis and optimization suggestions.
+            Upload your resume (DOCX format) and paste a job description to get instant ATS compatibility analysis and optimization suggestions.
           </p>
         </div>
 
@@ -251,7 +274,7 @@ function AIAtsChecker() {
                   type="file" 
                   ref={fileInputRef}
                   className="hidden" 
-                  accept=".pdf" 
+                  accept=".docx,.doc" 
                   onChange={handleFileUpload} 
                 />
                 
@@ -261,7 +284,7 @@ function AIAtsChecker() {
                       <FileText className="text-blue-500" size={24} />
                     </div>
                     <p className="text-gray-700 font-medium">{fileName}</p>
-                    <p className="text-sm text-gray-500 mt-1">{numPages} page{numPages !== 1 ? 's' : ''}</p>
+                    <p className="text-sm text-gray-500 mt-1">{wordCount} words</p>
                     <button 
                       className="mt-4 text-sm text-blue-500 hover:text-blue-700 flex items-center"
                       onClick={(e) => {
@@ -277,7 +300,7 @@ function AIAtsChecker() {
                   <>
                     <Upload className="text-gray-400 mb-4" size={40} />
                     <p className="text-gray-700 font-medium">Click to upload or drag and drop</p>
-                    <p className="text-sm text-gray-500 mt-1">PDF files only</p>
+                    <p className="text-sm text-gray-500 mt-1">DOCX files only</p>
                   </>
                 )}
               </div>
@@ -298,13 +321,12 @@ function AIAtsChecker() {
                 <h2 className="text-xl font-semibold">Enter Job Description</h2>
               </div>
               
-              <form onSubmit={analyzeResume}>
+              <div>
                 <textarea
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
                   placeholder="Paste the job description here..."
                   className="w-full h-64 p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
                 />
                 
                 <div className="flex justify-between mt-6">
@@ -317,7 +339,7 @@ function AIAtsChecker() {
                   </button>
                   
                   <button
-                    type="submit"
+                    onClick={analyzeResume}
                     disabled={!resumeText || !jobDescription}
                     className={`px-6 py-2 rounded-md text-white flex items-center ${
                       !resumeText || !jobDescription
@@ -329,7 +351,7 @@ function AIAtsChecker() {
                     Analyze Resume
                   </button>
                 </div>
-              </form>
+              </div>
             </div>
           </div>
         ) : (

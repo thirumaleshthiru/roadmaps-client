@@ -21,33 +21,33 @@ import EditBlog from '../pages/EditBlog';
 import AIGenerated from '../pages/AIGenerated';
 import AIAtsChecker from '../pages/AIAtsChecker';
 function Routex() {
-  return (
-       <Routes>
-        <Route path="/" element={<Home/>} />
-        <Route path="/roadmaps" element={<Roadmaps/>} />
-        <Route path='/roadmaps/:roadmapname' element={<Roadmap />} />
-        <Route path='/dashboard' element={<Dashobard />} />
-        <Route path='/login' element={<Login/>}/>
-        <Route path='/addconcept' element={<AddConcept/>}/>
-        <Route path='/addroadmap' element={<AddRoadmap/>}/>
-        <Route path='/manageroadmaps' element={<ManageRoadmaps/>}/>
-        <Route path='/manageconcepts' element={<ManageConcepts/>}/>
-        <Route path='/popular' element={<PopularRoadmaps />} />
-        <Route  path='/addblog' element={<AddBlog/>}/>
-        <Route  path='/manageblogs' element={<ManageBlogs/>}/>
-        <Route  path='/addresource' element={<AddResource/>}/>
-        <Route  path='/manageresources' element={<ManageResources/>}/>
-        <Route  path='/blog' element={<Blogs/>}/>
-        <Route  path='/resources' element={<Resources/>}/>
-        <Route  path='/post/:postname/:blog_id' element={<Post/>}/>
-      <Route path='/editblog/:id' element={<EditBlog />}/>
-            <Route path='/ai-generated-roadmaps' element={<AIGenerated/>}/>
-                        <Route path='/ai-ats-checker' element={<AIAtsChecker/>}/>
+return (
+<Routes>
+<Route path="/" element={<Home/>} />
+<Route path="/roadmaps" element={<Roadmaps/>} />
+<Route path='/roadmaps/:roadmapname' element={<Roadmap />} />
+<Route path='/dashboard' element={<Dashobard />} />
+<Route path='/login' element={<Login/>}/>
+<Route path='/addconcept' element={<AddConcept/>}/>
+<Route path='/addroadmap' element={<AddRoadmap/>}/>
+<Route path='/manageroadmaps' element={<ManageRoadmaps/>}/>
+<Route path='/manageconcepts' element={<ManageConcepts/>}/>
+<Route path='/popular' element={<PopularRoadmaps />} />
+<Route  path='/addblog' element={<AddBlog/>}/>
+<Route  path='/manageblogs' element={<ManageBlogs/>}/>
+<Route  path='/addresource' element={<AddResource/>}/>
+<Route  path='/manageresources' element={<ManageResources/>}/>
+<Route  path='/blog' element={<Blogs/>}/>
+<Route  path='/resources' element={<Resources/>}/>
+<Route  path='/post/:postname/:blog_id' element={<Post/>}/>
+<Route path='/editblog/:id' element={<EditBlog />}/>
+<Route path='/ai-generated-roadmaps' element={<AIGenerated/>}/>
+<Route path='/ai-ats-checker' element={<AIAtsChecker/>}/>
 
 
 
-      </Routes>
-   )
+</Routes>
+)
 }
 
 export default Routex

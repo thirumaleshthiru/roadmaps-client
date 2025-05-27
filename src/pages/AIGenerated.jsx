@@ -697,7 +697,7 @@ function AIGenerated() {
 
             {roadmap.concepts && roadmap.concepts.length > 0 ? (
               <div className="relative p-6">
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex md:items-center flex-col md:flex-row gap-4 justify-between mb-8">
                   <div className="flex items-center">
                     <Award className="text-indigo-500 mr-2" size={24} />
                     <h2 className="text-2xl font-semibold text-gray-800">Learning Path</h2>

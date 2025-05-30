@@ -429,7 +429,7 @@ function AIGenerated() {
     setGenerationProgress(10);
     
     try {
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
       setGenerationProgress(20);
       
       // Generate a unique roadmap ID
@@ -440,7 +440,7 @@ function AIGenerated() {
         {
           "roadmap_id": ${roadmapId},
           "roadmap_name": "${topic}",
-          "roadmap_description": "A detailed description of ${topic} and why it's important to learn",
+          "roadmap_description": "${topic}'s description in 50 words",
           "created_at": "${new Date().toISOString()}",
           "meta_title": "${topic}-roadmap",
           "meta_description": "A comprehensive step-by-step guide to learning ${topic}",
@@ -449,7 +449,7 @@ function AIGenerated() {
               "concept_id": 1,
               "concept_name": "Introduction to ${topic}",
               "concept_description": "A brief overview of what ${topic} is and why it matters",
-              "concept_details": "Brief Summary:\nA very brief and comprehensive summary of this concept in 2-3 sentences.\n\nKey Concepts:\n- First key concept\n- Second key concept\n- Third key concept\n- Fourth key concept\n\nExamples:\n- Practical example 1\n- Practical example 2\n- Practical example 3",
+              "concept_details": "Brief Summary :\nA very brief and comprehensive summary of this concept in 300 words minimum and 400 maximum.\n\nKey Concepts:\n- First key concept\n- Second key concept\n- Third key concept\n- Fourth key concept\n\nExamples:\n- Practical example 1\n- Practical example 2\n- Practical example 3",
               "roadmap_id": ${roadmapId}
             }
             // IMPORTANT: Include 20-25 concepts total, covering everything from absolute basics to advanced topics
@@ -460,10 +460,10 @@ function AIGenerated() {
         1. Generate 20-25 concepts that cover the COMPLETE learning journey from absolute beginner to advanced practitioner
         2. Each concept must build logically on previous concepts
         3. For concept_details, use ONLY this exact format:
-           - Brief Summary: 2-3 sentences maximum - very brief but comprehensive
-           - Key Concepts: 4-6 bullet points of the most important concepts
+           - Summary: (300 words minimum 500 words maximum) -  comprehensive
+           - Key Concepts: complete bullet points of the most important concepts
            - Examples: 3-4 practical examples or use cases
-        4. Keep everything concise and focused - no lengthy explanations
+        4. Keep everything concise and focused 
         5. The first few concepts MUST be suitable for complete beginners with no prior knowledge
         6. The final concepts should cover advanced topics that professionals would need to know
         7. Each section should be separated by double newlines
@@ -591,8 +591,7 @@ function AIGenerated() {
               style={{ width: `${generationProgress}%` }}
             ></div>
           </div>
-          <p className="text-sm text-gray-500">Creating 20-25 detailed learning concepts</p>
-        </div>
+         </div>
       </div>
     );
   }
@@ -736,9 +735,7 @@ function AIGenerated() {
             <p className="text-center text-lg text-gray-600 mb-4">
               Enterany topic above to generate a comprehensive learning roadmap.
             </p>
-            <p className="text-center text-md text-gray-500">
-              Our AI will create a detailed step-by-step guide with 20-25 concepts to help you master your chosen subject from basics to advanced topics.
-            </p>
+           
           </div>
         )}
       </div>

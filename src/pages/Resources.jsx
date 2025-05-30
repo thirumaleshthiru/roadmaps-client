@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, Suspense, useRef } from "react";
-import { Search, X, AlertCircle, ArrowRight, ChevronLeft, ChevronRight, Eye } from "lucide-react";
+import { Search, X, AlertCircle, ArrowRight, ChevronLeft, ChevronRight, Eye, Filter } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import axiosInstance from "../utils/axiosInstance";
 import { useCurrentLocation } from "../utils/useFulFunctions";
@@ -33,10 +33,12 @@ const Resources = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState("all");
   const [selectedResource, setSelectedResource] = useState(null);
+  const [showFilterModal, setShowFilterModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const modalRef = useRef(null);
+  const filterModalRef = useRef(null);
   const [, currentUrl] = useCurrentLocation();
 
   useEffect(() => {
@@ -110,6 +112,24 @@ const Resources = () => {
     };
   }, [selectedResource]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filterModalRef.current && !filterModalRef.current.contains(event.target)) {
+        setShowFilterModal(false);
+      }
+    };
+
+    if (showFilterModal) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.body.style.overflow = 'unset';
+    };
+  }, [showFilterModal]);
+
   const handleIncrementViews = async (resourceName) => {
     try {
       await axiosInstance.patch(`/api/resources/incrementviews/${resourceName}`);
@@ -162,6 +182,17 @@ const Resources = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
+  const handleFilterSelect = (type) => {
+    setSelectedType(type);
+    setShowFilterModal(false);
+  };
+
+  const clearAllFilters = () => {
+    setSelectedType("all");
+    setSearchQuery("");
+    setShowFilterModal(false);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -198,9 +229,10 @@ const Resources = () => {
             </p>
           </div>
           
-          {/* Search Section */}
-          <div className="max-w-3xl mx-auto px-4">
-            <div className="relative group">
+          {/* Search and Filter Section */}
+          <div className="max-w-3xl mx-auto px-4 flex gap-4">
+            {/* Search Bar */}
+            <div className="flex-1 relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-500"></div>
               <div className="relative">
                 <Search className="absolute left-4 md:left-6 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} aria-hidden="true" />
@@ -223,24 +255,36 @@ const Resources = () => {
                 )}
               </div>
             </div>
-          </div>
 
-          {/* Filter Section */}
-          <div className="flex flex-wrap justify-center gap-2 md:gap-3 px-4">
-            {resourceTypes.map((type) => (
-              <button
-                key={type}
-                onClick={() => setSelectedType(type)}
-                className={`px-3 md:px-5 py-1.5 md:py-2.5 rounded-xl text-xs md:text-sm font-medium transition-all duration-200 ${
-                  selectedType === type
-                    ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg"
-                    : "bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-200 hover:border-indigo-500"
-                }`}
-              >
-                {type.charAt(0).toUpperCase() + type.slice(1)}
-              </button>
-            ))}
+            {/* Filter Button */}
+            <button
+              onClick={() => setShowFilterModal(true)}
+              className="flex items-center gap-2 px-4 md:px-6 h-12 md:h-16 bg-white rounded-2xl border-2 border-gray-200 hover:border-indigo-500 transition-all duration-300 text-gray-700 hover:text-indigo-600 shadow-sm hover:shadow-md"
+            >
+              <Filter size={20} />
+              <span className="hidden sm:inline font-medium">Filters</span>
+              {selectedType !== "all" && (
+                <span className="w-2 h-2 bg-indigo-500 rounded-full"></span>
+              )}
+            </button>
           </div>
+          
+          {/* Active Filter Display */}
+          {selectedType !== "all" && (
+            <div className="flex justify-center px-4">
+              <div className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-xl">
+                <span className="text-sm font-medium">
+                  Filter: {selectedType.charAt(0).toUpperCase() + selectedType.slice(1)}
+                </span>
+                <button
+                  onClick={() => setSelectedType("all")}
+                  className="text-indigo-500 hover:text-indigo-700 transition-colors"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+          )}
           
           {/* Results Count */}
           {filteredResources.length > 0 && (
@@ -369,7 +413,61 @@ const Resources = () => {
         </div>
       </div>
 
-      {/* Modal */}
+      {/* Filter Modal */}
+      {showFilterModal && (
+        <div 
+          className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          aria-modal="true"
+          role="dialog"
+        >
+          <div 
+            ref={filterModalRef}
+            className="bg-white rounded-2xl w-full max-w-md shadow-2xl relative"
+          >
+            <div className="flex justify-between items-center p-6 border-b border-gray-200">
+              <h3 className="text-xl font-bold text-gray-900">Filter Resources</h3>
+              <button
+                onClick={() => setShowFilterModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-xl transition-colors duration-200"
+                aria-label="Close filter modal"
+              >
+                <X size={20} className="text-gray-500" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <h4 className="text-sm font-semibold text-gray-700 mb-3">Resource Type</h4>
+                <div className="space-y-2">
+                  {resourceTypes.map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => handleFilterSelect(type)}
+                      className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-200 ${
+                        selectedType === type
+                          ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg"
+                          : "bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200"
+                      }`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">
+                          {type.charAt(0).toUpperCase() + type.slice(1)}
+                        </span>
+                        {selectedType === type && (
+                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+ 
+          </div>
+        </div>
+      )}
+
+      {/* Resource Details Modal */}
       {selectedResource && (
         <div 
           className="fixed inset-0 bg-gray-900/90 backdrop-blur-sm flex items-center justify-center z-50 p-4"

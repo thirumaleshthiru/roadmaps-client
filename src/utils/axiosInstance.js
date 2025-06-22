@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-    baseURL:"https://roadmaps-server-production.up.railway.app"
+    baseURL:"http://localhost:7000"
 })
 
 export default axiosInstance

@@ -18,8 +18,7 @@ import Resources from '../pages/Resources';
 import Post from '../pages/Post';
 import Blogs from '../pages/Blogs';
 import EditBlog from '../pages/EditBlog';
-import AIGenerated from '../pages/AIGenerated';
-import AIAtsChecker from '../pages/AIAtsChecker';
+import AIGenerated from '../pages/AIGenerates';
 function Routex() {
 return (
 <Routes>
@@ -41,9 +40,8 @@ return (
 <Route  path='/resources' element={<Resources/>}/>
 <Route  path='/post/:postname/:blog_id' element={<Post/>}/>
 <Route path='/editblog/:id' element={<EditBlog />}/>
-<Route path='/ai-generated-roadmaps' element={<AIGenerated/>}/>
-<Route path='/ai-ats-checker' element={<AIAtsChecker/>}/>
-
+ 
+<Route path='/ai-generated-roadmaps' element={<AIGenerated />}/>
 
 
 </Routes>

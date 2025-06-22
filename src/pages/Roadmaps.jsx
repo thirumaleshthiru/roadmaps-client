@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/axiosInstance.js';
-import { Map, Search, X, AlertCircle, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Map, Search,   AlertCircle, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCurrentLocation } from '../utils/useFulFunctions.js';
 import { Helmet } from 'react-helmet-async';
 
@@ -176,15 +176,7 @@ function Roadmaps() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   aria-label="Search roadmaps"
                 />
-                {searchQuery && (
-                  <button 
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-6 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
-                    aria-label="Clear search"
-                  >
-                    <X size={20} />
-                  </button>
-                )}
+                 
               </div>
             </div>
           </div>

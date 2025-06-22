@@ -187,11 +187,11 @@ const Resources = () => {
     setShowFilterModal(false);
   };
 
-  const clearAllFilters = () => {
+  const clearAllFilters = useCallback(() => {
     setSelectedType("all");
     setSearchQuery("");
     setShowFilterModal(false);
-  };
+  }, []);
 
   if (loading) {
     return (
@@ -305,7 +305,7 @@ const Resources = () => {
                 <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 md:mb-4">No resources found</h3>
                 <p className="text-base md:text-lg text-gray-600 mb-6 md:mb-8">We couldn't find any resources matching your criteria. Try adjusting your search or filter.</p>
                 <button
-                  onClick={() => {setSearchQuery(""); setSelectedType("all");}}
+                  onClick={clearAllFilters}
                   className="px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 text-base md:text-lg font-medium shadow-lg hover:shadow-xl"
                 >
                   View All Resources
@@ -461,8 +461,16 @@ const Resources = () => {
                   ))}
                 </div>
               </div>
+
+              <div className="pt-4 border-t border-gray-200">
+                <button
+                  onClick={clearAllFilters}
+                  className="w-full px-4 py-3 text-center text-gray-600 hover:text-gray-800 transition-colors duration-200 font-medium"
+                >
+                  Clear All Filters
+                </button>
+              </div>
             </div>
- 
           </div>
         </div>
       )}

@@ -244,15 +244,7 @@ const Resources = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   aria-label="Search resources"
                 />
-                {searchQuery && (
-                  <button 
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-4 md:right-6 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
-                    aria-label="Clear search"
-                  >
-                    <X size={18} />
-                  </button>
-                )}
+                 
               </div>
             </div>
 

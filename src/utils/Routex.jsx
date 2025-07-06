@@ -20,6 +20,7 @@ import Blogs from '../pages/Blogs';
 import EditBlog from '../pages/EditBlog';
 import AIGenerated from '../pages/AIGenerates';
 import TopicBuilder from '../pages/TopicBuilder';
+import Checklist from '../pages/Checklist';
 function Routex() {
 return (
 <Routes>
@@ -44,6 +45,7 @@ return (
  
 <Route path='/ai-generated-roadmaps' element={<AIGenerated />}/>
 <Route path='/ai-topic-builder' element={<TopicBuilder/>}/>
+<Route path='/checklist' element={<Checklist/>}/>
 
 
 </Routes>

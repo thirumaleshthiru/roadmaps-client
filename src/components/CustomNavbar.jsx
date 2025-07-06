@@ -1,14 +1,36 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X} from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { useAuth } from '../utils/AuthConext';
 
 function CustomNavbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { token, logout } = useAuth();
 
+  // Navigation items array
+  const navigationItems = [
+    { name: 'Home', path: '/', showAlways: true },
+    { name: 'Roadmaps', path: '/roadmaps', showAlways: true },
+    { name: 'Popular', path: '/popular', showAlways: true },
+    { name: 'AI Generated Roadmaps', path: '/ai-generated-roadmaps', showAlways: true },
+    { name: 'Resources', path: '/resources', showAlways: true },
+    { name: 'Checklist', path: '/checklist', showAlways: true },
+    { name: 'Blog', path: '/blog', showAlways: true },
+    { name: 'Dashboard', path: '/dashboard', showAlways: false, requiresAuth: true }
+  ];
+
   const handleLogout = () => {
     logout();
+  };
+
+  // Filter navigation items based on authentication status
+  const getVisibleNavItems = () => {
+    return navigationItems.filter(item => {
+      if (item.requiresAuth) {
+        return token; // Only show if user is authenticated
+      }
+      return item.showAlways;
+    });
   };
 
   return (
@@ -20,32 +42,17 @@ function CustomNavbar() {
           </span>
         </Link>
         
+        {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-8">
-          <Link to="/" className="text-zinc-700 hover:text-indigo-600 transition">
-            Home
-          </Link>
-          <Link to="/roadmaps" className="text-zinc-700 hover:text-indigo-600 transition">
-            Roadmaps
-          </Link>
-          <Link to="/popular" className="text-zinc-700 hover:text-indigo-600 transition">
-            Popular
-          </Link>
-          <Link to="/ai-generated-roadmaps" className="text-zinc-700 hover:text-indigo-600 transition relative">
-            AI Generated Roadmaps
-          
-          </Link>
-          <Link to="/resources" className="text-zinc-700 hover:text-indigo-600 transition">
-            Resources
-          </Link>
-          <Link to="/blog" className="text-zinc-700 hover:text-indigo-600 transition">
-            Blog
-          </Link>
-
-          {token && (
-            <Link to="/dashboard" className="text-zinc-700 hover:text-indigo-600 transition">
-              Dashboard
+          {getVisibleNavItems().map((item) => (
+            <Link
+              key={item.name}
+              to={item.path}
+              className="text-zinc-700 hover:text-indigo-600 transition"
+            >
+              {item.name}
             </Link>
-          )}
+          ))}
           
           {token && (
             <button
@@ -54,9 +61,10 @@ function CustomNavbar() {
             >
               Logout
             </button>
-          ) }
+          )}
         </div>
         
+        {/* Mobile Menu Toggle */}
         <button onClick={() => setIsOpen(!isOpen)} className="md:hidden text-zinc-700">
           {isOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -81,59 +89,16 @@ function CustomNavbar() {
           
           <div className="flex-1 overflow-y-auto py-6">
             <div className="space-y-2 px-6">
-              <Link 
-                to="/" 
-                className="block text-zinc-700 hover:text-indigo-600 hover:bg-indigo-50 transition-all py-3 px-4 rounded-lg" 
-                onClick={() => setIsOpen(false)}
-              >
-                Home
-              </Link>
-              <Link 
-                to="/roadmaps" 
-                className="block text-zinc-700 hover:text-indigo-600 hover:bg-indigo-50 transition-all py-3 px-4 rounded-lg" 
-                onClick={() => setIsOpen(false)}
-              >
-                Roadmaps
-              </Link>
-              <Link 
-                to="/popular" 
-                className="block text-zinc-700 hover:text-indigo-600 hover:bg-indigo-50 transition-all py-3 px-4 rounded-lg" 
-                onClick={() => setIsOpen(false)}
-              >
-                Popular Roadmaps
-              </Link>
-              <Link 
-                to="/ai-generated-roadmaps" 
-                className="block text-zinc-700 hover:text-indigo-600 hover:bg-indigo-50 transition-all py-3 px-4 rounded-lg flex items-center justify-between" 
-                onClick={() => setIsOpen(false)}
-              >
-                <span>AI Generated Roadmaps</span>
-               
-              </Link>
-              <Link 
-                to="/resources" 
-                className="block text-zinc-700 hover:text-indigo-600 hover:bg-indigo-50 transition-all py-3 px-4 rounded-lg" 
-                onClick={() => setIsOpen(false)}
-              >
-                Resources
-              </Link>
-              <Link 
-                to="/blog" 
-                className="block text-zinc-700 hover:text-indigo-600 hover:bg-indigo-50 transition-all py-3 px-4 rounded-lg" 
-                onClick={() => setIsOpen(false)}
-              >
-                Blog
-              </Link>
-              
-              {token && (
-                <Link 
-                  to="/dashboard" 
-                  className="block text-zinc-700 hover:text-indigo-600 hover:bg-indigo-50 transition-all py-3 px-4 rounded-lg" 
+              {getVisibleNavItems().map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  className="block text-zinc-700 hover:text-indigo-600 hover:bg-indigo-50 transition-all py-3 px-4 rounded-lg"
                   onClick={() => setIsOpen(false)}
                 >
-                  Dashboard
+                  {item.name}
                 </Link>
-              )}
+              ))}
             </div>
           </div>
           

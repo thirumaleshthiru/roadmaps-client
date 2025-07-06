@@ -1,5 +1,4 @@
-"use client"
-
+ 
 import { useState, useEffect, useRef } from "react"
 import { ChevronRight, ChevronLeft, RotateCcw, BarChart3, Calendar, Sun, Moon } from "lucide-react"
 import { GoogleGenerativeAI } from "@google/generative-ai"
@@ -89,274 +88,14 @@ function TopicBuilder() {
   }
 
   // Advanced JSON cleaning and parsing function
-  const cleanAndParseJSON = (jsonString) => {
-    try {
-      // Strategy 1: Try parsing as-is first
-      return JSON.parse(jsonString)
-    } catch (error) {
-      // Strategy 2: Clean and extract JSON
-      try {
-        let cleaned = jsonString
-
-        // Remove markdown code blocks and any text before/after JSON
-        cleaned = cleaned.replace(/```json\s*/g, "").replace(/```\s*/g, "")
-
-        // Find the actual JSON object
-        const jsonStart = cleaned.indexOf("{")
-        const jsonEnd = cleaned.lastIndexOf("}")
-
-        if (jsonStart === -1 || jsonEnd === -1) {
-          throw new Error("No valid JSON object found in response")
-        }
-
-        cleaned = cleaned.substring(jsonStart, jsonEnd + 1)
-
-        // Check if JSON is complete by counting braces
-        const openBraces = (cleaned.match(/{/g) || []).length
-        const closeBraces = (cleaned.match(/}/g) || []).length
-
-        if (openBraces !== closeBraces) {
-          throw new Error("Incomplete JSON structure detected")
-        }
-
-        // Fix common JSON issues
-        cleaned = cleaned
-          // Replace unescaped newlines and tabs in strings
-          .replace(/("content":\s*"[^"]*?)(\n|\r\n|\r)([^"]*?")/g, "$1 $3")
-          .replace(/("content":\s*"[^"]*?)(\t)([^"]*?")/g, "$1 $3")
-          // Remove any trailing commas
-          .replace(/,(\s*[}\]])/g, "$1")
-          // Fix any double commas
-          .replace(/,,+/g, ",")
-
-        return JSON.parse(cleaned)
-      } catch (error) {
-        // Strategy 3: Manual reconstruction for severely malformed JSON
-        try {
-          const lines = jsonString.split("\n")
-          let title = ""
-          let sections = []
-          let currentSection = {}
-          let inContent = false
-          let contentLines = []
-
-          for (let line of lines) {
-            line = line.trim()
-
-            // Extract title
-            if (line.includes('"title":') && !title) {
-              const titleMatch = line.match(/"title":\s*"([^"]*)"/)
-              if (titleMatch) title = titleMatch[1]
-            }
-
-            // Extract section title
-            if (line.includes('"title":') && inContent === false && currentSection.title === undefined) {
-              const titleMatch = line.match(/"title":\s*"([^"]*)"/)
-              if (titleMatch) {
-                currentSection.title = titleMatch[1]
-              }
-            }
-
-            // Start of content
-            if (line.includes('"content":')) {
-              inContent = true
-              const contentStart = line.indexOf('"content":')
-              const afterContent = line.substring(contentStart + 10).trim()
-              if (afterContent.startsWith('"')) {
-                contentLines = [afterContent.substring(1)]
-              }
-              continue
-            }
-
-            // End of content or section
-            if (inContent && (line.endsWith('",') || line.endsWith('"'))) {
-              if (line.endsWith('",')) {
-                contentLines.push(line.substring(0, line.length - 2))
-              } else {
-                contentLines.push(line.substring(0, line.length - 1))
-              }
-
-              currentSection.content = contentLines.join(" ").trim()
-              sections.push(currentSection)
-              currentSection = {}
-              contentLines = []
-              inContent = false
-              continue
-            }
-
-            // Content continuation
-            if (inContent) {
-              contentLines.push(line)
-            }
-          }
-
-          // Generate fallback sections if parsing failed
-          if (sections.length === 0) {
-            sections = [
-              {
-                title: "Introduction and Overview",
-                content: `This comprehensive guide covers ${customTopic} from fundamental concepts to advanced applications. You'll learn the essential principles, practical implementations, and real-world use cases that make ${customTopic} an important subject to master.`,
-              },
-              {
-                title: "Core Concepts and Fundamentals",
-                content: `Understanding the foundational elements of ${customTopic} is crucial for building expertise. This section explores the key principles, terminology, and basic concepts that form the backbone of ${customTopic} knowledge.`,
-              },
-              {
-                title: "Practical Applications and Examples",
-                content: `Real-world applications of ${customTopic} demonstrate its practical value and versatility. Through concrete examples and case studies, you'll see how ${customTopic} is applied across different industries and scenarios.`,
-              },
-              {
-                title: "Advanced Techniques and Best Practices",
-                content: `Advanced concepts in ${customTopic} build upon the fundamentals to provide deeper insights and more sophisticated approaches. This section covers expert-level techniques and industry best practices.`,
-              },
-              {
-                title: "Implementation and Future Directions",
-                content: `Putting ${customTopic} knowledge into practice requires understanding implementation strategies and staying current with emerging trends. This final section provides guidance on practical application and future developments in the field.`,
-              },
-            ]
-          }
-
-          return {
-            title: title || `Complete Guide to ${customTopic}`,
-            category: "Educational Topic",
-            sections: sections,
-          }
-        } catch (error) {
-          throw new Error("Unable to parse AI response. Please try again.")
-        }
-      }
-    }
-  }
+  // Removed unused cleanAndParseJSON function
 
   // Helper function to format content into paragraphs and handle special formatting
-  const formatContent = (content) => {
-    // Split content into words
-    const words = content.split(" ")
-    const paragraphs = []
+  // Removed unused formatContent function
 
-    // Group words into paragraphs of approximately 70 words
-    for (let i = 0; i < words.length; i += 70) {
-      const paragraphWords = words.slice(i, i + 70)
-      const paragraph = paragraphWords.join(" ")
-      paragraphs.push(paragraph)
-    }
 
-    return paragraphs
-  }
 
-  const renderFormattedText = (text) => {
-    // Handle different formatting types
-    const parts = []
-
-    // Process bold text (asterisks)
-    const boldRegex = /\*([^*]+)\*/g
-    let lastIndex = 0
-    let match
-
-    while ((match = boldRegex.exec(text)) !== null) {
-      // Add text before the match
-      if (match.index > lastIndex) {
-        parts.push(text.slice(lastIndex, match.index))
-      }
-      // Add bold text
-      parts.push(<strong key={match.index}>{match[1]}</strong>)
-      lastIndex = match.index + match[0].length
-    }
-
-    // Add remaining text
-    if (lastIndex < text.length) {
-      parts.push(text.slice(lastIndex))
-    }
-
-    // Handle code blocks
-    return parts.map((part, index) => {
-      if (typeof part === "string") {
-        // Check for code blocks
-        const codeRegex = /`([^`]+)`/g
-        const codeParts = []
-        let lastCodeIndex = 0
-        let codeMatch
-
-        while ((codeMatch = codeRegex.exec(part)) !== null) {
-          if (codeMatch.index > lastCodeIndex) {
-            codeParts.push(part.slice(lastCodeIndex, codeMatch.index))
-          }
-          codeParts.push(
-            <code
-              key={`code-${index}-${codeMatch.index}`}
-              className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm font-mono"
-            >
-              {codeMatch[1]}
-            </code>,
-          )
-          lastCodeIndex = codeMatch.index + codeMatch[0].length
-        }
-
-        if (lastCodeIndex < part.length) {
-          codeParts.push(part.slice(lastCodeIndex))
-        }
-
-        return codeParts.length > 1 ? codeParts : part
-      }
-      return part
-    })
-  }
-
-  const renderListItems = (text) => {
-    const lines = text.split("\n")
-    const listItems = []
-    let currentList = []
-    let isInList = false
-
-    lines.forEach((line, index) => {
-      const trimmedLine = line.trim()
-
-      if (trimmedLine.match(/^\d+\.\s/) || trimmedLine.match(/^-\s/)) {
-        if (!isInList) {
-          isInList = true
-          currentList = []
-        }
-        const content = trimmedLine.replace(/^\d+\.\s|^-\s/, "")
-        currentList.push(content)
-      } else {
-        if (isInList && currentList.length > 0) {
-          listItems.push(
-            <ul key={`list-${index}`} className="list-disc list-inside my-4 space-y-2">
-              {currentList.map((item, itemIndex) => (
-                <li key={itemIndex} className="ml-4">
-                  {renderFormattedText(item)}
-                </li>
-              ))}
-            </ul>,
-          )
-          currentList = []
-          isInList = false
-        }
-        if (trimmedLine) {
-          listItems.push(
-            <p key={`text-${index}`} className="mb-4">
-              {renderFormattedText(trimmedLine)}
-            </p>,
-          )
-        }
-      }
-    })
-
-    // Handle remaining list items
-    if (isInList && currentList.length > 0) {
-      listItems.push(
-        <ul key="final-list" className="list-disc list-inside my-4 space-y-2">
-          {currentList.map((item, itemIndex) => (
-            <li key={itemIndex} className="ml-4">
-              {renderFormattedText(item)}
-            </li>
-          ))}
-        </ul>,
-      )
-    }
-
-    return listItems
-  }
+  // Removed unused renderListItems function
 
   const generateTopicContent = async () => {
     setIsGenerating(true)
@@ -365,81 +104,241 @@ function TopicBuilder() {
     try {
       const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
 
-      const prompt = `Create comprehensive educational content about "${topic}" in valid JSON format.
+      const prompt = `Create a comprehensive educational guide about "${topic}" with dynamic content types. Return the content in this exact JSON format:
 
-You are an expert educator creating a complete learning resource. Generate between 8-15 sections based on the complexity and breadth of the topic.
-
-CONTENT REQUIREMENTS:
-- Each section should be very detailed and comprehensive (1500+ words minimum)
-- Include practical examples, code snippets (when relevant), and real-world applications
-- Use bullet points and numbered lists extensively
-- Cover beginner to advanced concepts
-- Include step-by-step tutorials where applicable
-- Add troubleshooting tips and common mistakes
-- Provide best practices and industry standards
-
-FORMATTING:
-- Use *asterisks* for important terms and concepts
-- Use \`backticks\` for code, commands, and technical terms
-- Use numbered lists for procedures: 1. Step one 2. Step two
-- Use bullet points for features: - Feature one - Feature two
-- Include code examples in backticks when relevant
-
-JSON STRUCTURE:
 {
-  "title": "Complete Mastery Guide to ${topic}",
-  "category": "Educational Topic",
+  "title": "Complete Guide to ${topic}",
+  "category": "Topic Category",
   "sections": [
     {
-      "title": "Section title based on topic complexity",
-      "content": "Very detailed content with examples, lists, code snippets, and comprehensive explanations"
+      "title": "Section Title",
+      "content_blocks": [
+        {
+          "type": "text",
+          "content": "Detailed explanatory text"
+        },
+        {
+          "type": "list",
+          "style": "bullet|numbered",
+          "items": [
+            "List item 1",
+            "List item 2"
+          ]
+        },
+        {
+          "type": "code",
+          "language": "language_name",
+          "content": "code_example"
+        }
+      ]
     }
   ]
 }
 
+STRUCTURAL REQUIREMENTS:
+1. Generate exactly 12-15 comprehensive sections
+2. Each section must follow a clear learning progression
+3. Each section should contain 5-8 content blocks
+4. Use an appropriate mix of content types based on the topic
+5. Include relevant examples and practical applications
+
+SECTION PROGRESSION (adapt based on topic):
+1. Introduction and Fundamentals
+2. Core Concepts and Basic Principles
+3. Essential Components/Elements
+4. Theoretical Framework
+5. Practical Applications
+6. Advanced Concepts
+7. Real-world Examples and Case Studies
+8. Common Challenges and Solutions
+9. Best Practices and Guidelines
+10. Practical Exercises and Activities
+11. Advanced Applications
+12. Future Trends and Developments
+(Additional sections based on topic complexity)
+
+CONTENT GUIDELINES:
+1. Start with basic concepts and progressively increase complexity
+2. Include clear examples and explanations
+3. Break down complex ideas into digestible parts
+4. Use lists for:
+   - Key points and summaries
+   - Step-by-step instructions
+   - Comparisons and contrasts
+   - Features and characteristics
+5. Each section should be self-contained but build upon previous sections
+6. Include practical exercises or activities where relevant
+7. Address common misconceptions and mistakes
+8. Provide real-world applications and examples
+
+FORMAT RULES:
+- Each text block should be substantial and well-structured
+- Lists should be comprehensive (4-8 items) 
+- Examples should be clear, practical and relatable
+- Code examples (when appropriate) should be well-commented
+- Content should be factually accurate and current
+- Use proper terminology with clear explanations
+- Balance theoretical concepts with practical applications
+
 IMPORTANT:
-- Generate 8-15 sections based on topic complexity
-- Each section must be very comprehensive and detailed
-- Include practical examples and code when relevant
-- Use extensive lists and formatting
-- Return only valid JSON with no extra text
-- Escape all quotes properly`
+- Return ONLY valid JSON
+- No markdown formatting in content
+- No placeholders or TODO comments
+- Ensure all content is complete and comprehensive
+- Double-check JSON structure before returning`
 
       const result = await model.generateContent(prompt)
       const response = await result.response.text()
 
-      // Clean and parse the JSON response
-      const parsedContent = cleanAndParseJSON(response)
+      // Enhanced JSON cleaning and parsing
+      try {
+        let cleaned = response;
+        
+        // Remove any markdown or text outside the JSON
+        cleaned = cleaned.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+        
+        // Find the actual JSON object
+        const jsonStart = cleaned.indexOf('{');
+        const jsonEnd = cleaned.lastIndexOf('}');
+        
+        if (jsonStart === -1 || jsonEnd === -1) {
+          throw new Error("No valid JSON object found in response");
+        }
+        
+        cleaned = cleaned.substring(jsonStart, jsonEnd + 1);
+        
+        // Fix common JSON formatting issues
+        cleaned = cleaned
+          // Remove comments
+          .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
+          // Fix unescaped newlines in strings
+          .replace(/(?<!\\)\\n/g, '\\n')
+          // Fix unescaped quotes in strings
+          .replace(/(?<!\\)"/g, '\\"')
+          // Remove trailing commas
+          .replace(/,(\s*[}\]])/g, '$1')
+          // Fix double commas
+          .replace(/,,+/g, ',');
 
-      // Validate the parsed content
-      if (!parsedContent || typeof parsedContent !== "object") {
-        throw new Error("Invalid response format: not an object")
+        const parsed = JSON.parse(cleaned);
+        
+        // Validate structure
+        if (!parsed.sections || !Array.isArray(parsed.sections)) {
+          throw new Error("Invalid response format: missing sections array");
+        }
+
+        if (parsed.sections.length < 12) {
+          throw new Error("Insufficient content: less than 12 sections");
+        }
+
+        // Validate each section
+        parsed.sections.forEach((section, index) => {
+          if (!section.title || !section.content_blocks || !Array.isArray(section.content_blocks)) {
+            throw new Error(`Invalid section format at index ${index}`);
+          }
+          
+          if (section.content_blocks.length < 3) {
+            throw new Error(`Insufficient content blocks in section ${index}`);
+          }
+
+          // Validate and clean each content block
+          section.content_blocks = section.content_blocks.map((block, blockIndex) => {
+            if (!block.type || !block.content) {
+              throw new Error(`Invalid content block at section ${index}, block ${blockIndex}`);
+            }
+
+            // Clean up content based on type
+            switch (block.type) {
+              case 'text':
+                block.content = block.content.trim();
+                break;
+              case 'list':
+                if (!block.style || !Array.isArray(block.items) || block.items.length === 0) {
+                  throw new Error(`Invalid list block at section ${index}, block ${blockIndex}`);
+                }
+                block.items = block.items.map(item => item.trim());
+                block.style = ['bullet', 'numbered'].includes(block.style) ? block.style : 'bullet';
+                break;
+              case 'code':
+                block.language = block.language?.toLowerCase().trim() || 'plaintext';
+                block.content = block.content.trim();
+                break;
+            }
+            return block;
+          });
+        });
+
+        setTopicContent(parsed.sections);
+        setTopicInfo({
+          title: parsed.title || `Complete Guide to ${topic}`,
+          category: parsed.category || "Educational Topic",
+        });
+        setCurrentSection(0);
+        setIsLearning(true);
+        setTopicCompleted(false)
+        updateAnalyticsOnSuccess()
+
+      } catch (error) {
+        throw new Error(`Failed to process AI response: ${error.message}. Trying to regenerate...`)
       }
 
-      if (!parsedContent.sections || !Array.isArray(parsedContent.sections)) {
-        throw new Error("Invalid response format: missing sections array")
-      }
-
-      if (parsedContent.sections.length === 0) {
-        throw new Error("Invalid response format: empty sections array")
-      }
-
-      setTopicContent(parsedContent.sections)
-      setTopicInfo({
-        title: parsedContent.title || `Complete Guide to ${topic}`,
-        category: parsedContent.category || "Educational Topic",
-      })
-      setCurrentSection(0)
-      setIsLearning(true)
-      setTopicCompleted(false)
-
-      // Only update analytics on successful generation
-      updateAnalyticsOnSuccess()
     } catch (error) {
       alert(`Failed to generate topic content: ${error.message}. Please try again.`)
     } finally {
       setIsGenerating(false)
     }
+  }
+
+  // Update the content rendering to handle the new structured format
+  const renderContentBlock = (block) => {
+    switch (block.type) {
+      case 'text':
+        return (
+          <p className="mb-4 leading-relaxed" style={{ color: darkMode ? "#e2e8f0" : "#374151" }}>
+            {block.content}
+          </p>
+        );
+      case 'code':
+        return (
+          <pre className="relative bg-gray-100 dark:bg-gray-800 p-4 rounded-lg my-4 overflow-x-auto font-mono border border-gray-200 dark:border-gray-700">
+            <div className="absolute right-2 top-2 text-xs text-gray-500 dark:text-gray-400">
+              {block.language}
+            </div>
+            <code className={`language-${block.language || 'plaintext'}`}>
+              {block.content}
+            </code>
+          </pre>
+        );
+      case 'list':
+        return (
+          <div className={`my-4 space-y-2 ${block.style === 'numbered' ? 'list-decimal' : 'list-disc'} list-inside`}>
+            {block.items.map((item, index) => (
+              <li key={index} className="ml-4 mb-2">
+                {item}
+              </li>
+            ))}
+          </div>
+        );
+      default:
+        // Default case for unknown block types
+        return null;
+    }
+  }
+
+  // Update the content section rendering
+  const renderContent = () => {
+    const section = topicContent[currentSection];
+    if (!section) return null;
+
+    return (
+      <div className="prose prose-lg max-w-none">
+        {section.content_blocks.map((block, index) => (
+          <div key={index}>
+            {renderContentBlock(block)}
+          </div>
+        ))}
+      </div>
+    );
   }
 
   const nextSection = () => {
@@ -590,17 +489,7 @@ IMPORTANT:
             <h2 className="text-xl sm:text-2xl font-medium mb-4" style={{ color: darkStyles.color }}>
               {topicContent[currentSection]?.title}
             </h2>
-            <div className="prose prose-lg max-w-none">
-              {formatContent(topicContent[currentSection]?.content || "").map((paragraph, index) => (
-                <div
-                  key={index}
-                  className="leading-relaxed mb-4 text-base sm:text-lg"
-                  style={{ color: darkMode ? "#e2e8f0" : "#374151" }}
-                >
-                  {renderListItems(paragraph.trim())}
-                </div>
-              ))}
-            </div>
+            {renderContent()}
 
             {/* AI Disclaimer */}
             {currentSection === topicContent.length - 1 && (
@@ -999,7 +888,7 @@ IMPORTANT:
         `}
       </style>
     </div>
-  )
+  );
 }
 
-export default TopicBuilder
+export default TopicBuilder;

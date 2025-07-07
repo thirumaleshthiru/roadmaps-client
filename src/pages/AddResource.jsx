@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../utils/AuthConext";
 import { useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import { Title, Meta } from "react-head";
 import { Library, AlertCircle, CheckCircle2, ArrowRight, Youtube, Globe, FileText, Book, FileIcon } from "lucide-react";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 import axiosInstance from "../utils/axiosInstance";
 
 function AddResource() {
@@ -81,13 +81,8 @@ function AddResource() {
 
   return (
     <>
-      <Helmet>
-        <title>Add New Resource | Learning Hub</title>
-        <meta
-          name="description"
-          content="Add new learning resources including articles, videos, and courses"
-        />
-      </Helmet>
+      <Title>Add New Resource | Learning Hub</Title>
+      <Meta name="description" content="Add new learning resources including articles, videos, and courses" />
       <div className="min-h-screen bg-slate-50">
         <div className="max-w-4xl mx-auto px-4 py-12 md:px-8 space-y-12">
           <div className="text-center">

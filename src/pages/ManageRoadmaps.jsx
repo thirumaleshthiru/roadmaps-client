@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../utils/AuthConext";
 import { useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import { Title, Meta } from "react-head";
 import axiosInstance from "../utils/axiosInstance";
 
 function ManageRoadmaps() {
@@ -59,13 +59,8 @@ function ManageRoadmaps() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Helmet>
-        <title>Manage Roadmaps | Learning Hub</title>
-        <meta
-          name="description"
-          content="Manage and organize learning roadmaps"
-        />
-      </Helmet>
+      <Title>Manage Roadmaps | Learning Hub</Title>
+      <Meta name="description" content="Manage and organize learning roadmaps" />
 
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">

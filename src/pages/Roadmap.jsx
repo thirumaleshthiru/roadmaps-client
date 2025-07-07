@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import { Title, Meta } from 'react-head';
 import { useCurrentLocation } from '../utils/useFulFunctions.js';
 import { ChevronRight, Award, Book } from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
@@ -111,14 +111,9 @@ function Roadmap() {
 
   return (
     <>
-      <Helmet>
-        <title>{`Latest Expert Design Roadmap: ${roadmapname}`}</title>
-        <meta
-          name="description"
-          content={`Engage your skills with our new expert ${roadmapname} roadmap.`}
-        />
-        <link rel="canonical" href={currentUrl} />
-      </Helmet>
+      <Title>{`Latest Expert Design Roadmap: ${roadmapname}`}</Title>
+      <Meta name="description" content={`Engage your skills with our new expert ${roadmapname} roadmap.`} />
+      <Meta rel="canonical" href={currentUrl} />
 
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl shadow-xl p-8 mb-12">

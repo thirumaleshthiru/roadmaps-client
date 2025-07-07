@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../utils/AuthConext";
 import { useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import { Title, Meta } from "react-head";
 import { Map, AlertCircle, CheckCircle2, ArrowRight } from "lucide-react";
 import axiosInstance from "../utils/axiosInstance";
 
@@ -56,13 +56,8 @@ function AddRoadmap() {
 
   return (
     <>
-      <Helmet>
-        <title>Create New Roadmap | Learning Hub</title>
-        <meta
-          name="description"
-          content="Create and design new learning roadmaps for your educational content"
-        />
-      </Helmet>
+      <Title>Create New Roadmap | Learning Hub</Title>
+      <Meta name="description" content="Create and design new learning roadmaps for your educational content" />
       <div className="min-h-screen bg-slate-50">
         <div className="max-w-4xl mx-auto px-4 py-12 md:px-8 space-y-12">
           <div className="text-center">

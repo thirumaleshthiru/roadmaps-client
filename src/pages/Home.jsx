@@ -10,7 +10,7 @@ import {
   Star,
   ChevronRight,
   CheckCircle,
-  Users,
+
   Award
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -261,75 +261,7 @@ import HeroBanner from "../assets/hero-banner.webp";
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-24 bg-zinc-50 relative overflow-hidden">
-  <div className="absolute top-0 left-0 w-full h-full opacity-40">
-    <svg className="absolute top-0 left-0 text-indigo-200 w-32 h-32 opacity-50" viewBox="0 0 100 100">
-      <path d="M30,10 L70,10 L90,30 L90,70 L70,90 L30,90 L10,70 L10,30 Z" stroke="#7b7dfc" strokeWidth="4" fill="none" />
-    </svg>
-    <svg className="absolute bottom-0 right-0 text-indigo-200 w-48 h-48 opacity-50" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="40" stroke="#7b7dfc" strokeWidth="4" fill="none" />
-    </svg>
-  </div>
-
-  <div className="container mx-auto px-6 relative z-10">
-    <div className="text-center max-w-2xl mx-auto mb-16">
-      <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-indigo-50 text-indigo-600 font-medium text-sm mb-4">
-        <Users className="w-4 h-4" />
-        Testimonials
-      </div>
-      <h2 className="text-3xl font-bold mb-4">What Our Users Say</h2>
-      <p className="text-zinc-600">Join thousands of satisfied learners who transformed their skills with our roadmaps</p>
-    </div>
-
-    <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-      {[
-        {
-          quote: "The structured approach of these roadmaps helped me transition into a full-stack developer role in just 6 months.",
-          author: "Koushik",
-          role: "Full-Stack Developer"
-        },
-        {
-          quote: "I've tried many learning platforms, but the expert curation and clear milestones here made all the difference.",
-          author: "Anand",
-          role: "Data Scientist"
-        },
-        {
-          quote: "The roadmaps provided exactly what I needed to fill the gaps in my knowledge and advance my career.",
-          author: "Charan",
-          role: "UX Designer"
-        },
-        {
-          quote: "As someone switching careers, the clarity and structure of the roadmap gave me confidence and real progress week after week.",
-          author: "Thirumalesh",
-          role: "Frontend Developer"
-        }
-      ].map((testimonial, index) => (
-        <div 
-          key={index}
-          className="bg-white p-8 rounded-3xl shadow-lg border border-zinc-100"
-        >
-          <div className="text-indigo-400 mb-4">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M11.1 16.9C9.6 16.9 8.3 16.35 7.4 15.25C6.5 14.15 6 12.7 6 11C6 9.2 6.55 7.7 7.7 6.5C8.85 5.3 10.35 4.7 12.2 4.7C13.7 4.7 14.9 5.25 15.8 6.35C16.7 7.45 17.2 8.9 17.2 10.6C17.2 12.7 16.6 14.35 15.4 15.5C14.2 16.65 12.6 17.2 10.6 17.2L10.2 16.9H11.1Z" fill="currentColor"/>
-            </svg>
-          </div>
-          <p className="text-zinc-700 mb-6">{testimonial.quote}</p>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
-              {testimonial.author.charAt(0)}
-            </div>
-            <div>
-              <div className="font-medium">{testimonial.author}</div>
-              <div className="text-sm text-zinc-500">{testimonial.role}</div>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-</section>
-
+       
 
       {/* CTA */}
       <section className="py-20 bg-white">

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, Suspense, useRef } from "react";
 import { Search, X, AlertCircle, ArrowRight, ChevronLeft, ChevronRight, Eye, Filter } from "lucide-react";
-import { Helmet } from "react-helmet-async";
+import { Title, Meta } from "react-head";
 import axiosInstance from "../utils/axiosInstance";
 import { useCurrentLocation } from "../utils/useFulFunctions";
 
@@ -212,16 +212,16 @@ const Resources = () => {
 
   return (
     <>
-      <Helmet>
-        <title>Learning Resources | Education Hub</title>
-        <meta name="description" content="Access curated learning resources to accelerate your journey to mastery." />
-        <link rel="canonical" href={currentUrl} />
-      </Helmet>
+      
+<Title>Learning Resources | Education Hub</Title>
+<Meta name="description" content="Access curated learning resources to accelerate your journey to mastery" />
+<Meta rel="canonical" href={currentUrl} />
+
       <div className="min-h-screen">
         <div className="max-w-7xl mx-auto px-4 py-16 md:px-8 space-y-12">
           {/* Hero Section */}
           <div className="text-center space-y-4 md:space-y-6 px-4">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 p-6">
               Learning Resources
             </h1>
             <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed px-4">

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/axiosInstance.js';
 import { ArrowRight, Zap, Map } from 'lucide-react';
 import { useCurrentLocation } from '../utils/useFulFunctions.js';
-import { Helmet } from 'react-helmet-async';
+import { Title, Meta } from 'react-head';
 
 const SkeletonLoader = () => (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-pulse">
@@ -74,14 +74,9 @@ function PopularRoadmaps() {
 
   return (
     <>
-      <Helmet>
-        <title>Popular Roadmaps | Learning Hub</title>
-        <meta
-          name="description"
-          content="Explore our most popular learning roadmaps curated by experts for Java, Python, UI/UX, Figma, and more."
-        />
-        <link rel="canonical" href={currentUrl} />
-      </Helmet>
+      <Title>Popular Roadmaps | Learning Hub</Title>
+      <Meta name="description" content="Explore our most popular learning roadmaps curated by experts for Java, Python, UI/UX, Figma, and more." />
+      <Meta rel="canonical" href={currentUrl} />
       <div className="min-h-screen">
         <div className="max-w-7xl mx-auto px-4 py-16 md:px-8 space-y-12">
           {/* Hero Section */}
@@ -90,7 +85,7 @@ function PopularRoadmaps() {
               <Zap size={18} />
               <span>Most Popular</span>
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
+            <h1 className="text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 p-6">
               Trending Learning Paths
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">

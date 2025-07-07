@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../utils/AuthConext";
 import { useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import { Title, Meta } from "react-head";
 import { FileText, AlertCircle, CheckCircle2 } from "lucide-react";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 import axiosInstance from "../utils/axiosInstance";
 
 function AddConcept() {
@@ -83,13 +83,8 @@ function AddConcept() {
 
   return (
     <>
-      <Helmet>
-        <title>Add New Concept | Learning Hub</title>
-        <meta
-          name="description"
-          content="Create and add new learning concepts to your roadmaps"
-        />
-      </Helmet>
+      <Title>Add New Concept | Learning Hub</Title>
+      <Meta name="description" content="Create and add new learning concepts to your roadmaps" />
       <div className="min-h-screen bg-slate-50">
         <div className="max-w-4xl mx-auto px-4 py-12 md:px-8 space-y-12">
           <div className="text-center">

@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useAuth } from "../utils/AuthConext";
 import { useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import { Title, Meta } from "react-head";
 import { 
  
   Plus, 
@@ -77,13 +77,8 @@ function Dashboard() {
 
   return (
     <>
-      <Helmet>
-        <title>Admin Dashboard | Learning Hub</title>
-        <meta
-          name="description"
-          content="Administrative dashboard for managing learning content and resources"
-        />
-      </Helmet>
+      <Title>Admin Dashboard | Learning Hub</Title>
+      <Meta name="description" content="Administrative dashboard for managing learning content and resources" />
       <div className="min-h-screen bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 py-12 md:px-8 space-y-12">
           <div className="text-center">

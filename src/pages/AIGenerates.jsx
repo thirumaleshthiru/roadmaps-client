@@ -1,5 +1,5 @@
  import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
-import { Helmet } from 'react-helmet-async';
+import { Title, Meta } from 'react-head';
 import { useCurrentLocation } from '../utils/useFulFunctions.js';
 import { ChevronRight, Award, Book, Send, Loader2, X, BookOpen, ExternalLink, Check } from 'lucide-react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -440,7 +440,7 @@ function AIGenerated() {
         {
           "roadmap_id": ${roadmapId},
           "roadmap_name": "${topic}",
-          "roadmap_description": "${topic}'s description in 50 words",
+          "roadmap_description": "What is ${topic}'s in 50 words",
           "created_at": "${new Date().toISOString()}",
           "meta_title": "${topic}-roadmap",
           "meta_description": "A comprehensive step-by-step guide to learning ${topic}",
@@ -464,8 +464,8 @@ function AIGenerated() {
            - Key Concepts: complete bullet points of the most important concepts
            - Examples: 3-4 practical examples or use cases
         4. Keep everything concise and focused 
-        5. The first few concepts MUST be suitable for complete beginners with no prior knowledge
-        6. The final concepts should cover advanced topics that professionals would need to know
+        5. The first few concepts MUST be suitable for complete beginners with no prior knowledge next will be intermediate
+        6. The final 5 concepts should cover advanced topics that professionals would need to know
         7. Each section should be separated by double newlines
         8. Use simple bullet points with dashes for lists
         9. Make sure Brief Summary is truly brief but covers the essence of the concept
@@ -616,14 +616,9 @@ function AIGenerated() {
   // Main content - always show the form at the top
   return (
     <>
-      <Helmet>
-        <title>{roadmap ? `Expert ${roadmap.roadmap_name} Learning Roadmap` : "AI-Generated Learning Roadmaps"}</title>
-        <meta
-          name="description"
-          content={roadmap ? roadmap.roadmap_description : "Generate comprehensive learning roadmaps for any topic using AI"}
-        />
-        <link rel="canonical" href={currentUrl} />
-      </Helmet>
+      <Title>{roadmap ? `Expert ${roadmap.roadmap_name} Learning Roadmap` : "AI-Generated Learning Roadmaps"}</Title>
+      <Meta name="description" content={roadmap ? roadmap.roadmap_description : "Generate comprehensive learning roadmaps for any topic using AI"} />
+      <Meta rel="canonical" href={currentUrl} />
 
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl shadow-xl p-8 mb-12">

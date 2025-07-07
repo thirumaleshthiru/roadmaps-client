@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/axiosInstance';
-import { Helmet } from 'react-helmet-async';
+import { Title, Meta } from 'react-head';
 
 const Blogs = () => {
   const navigate = useNavigate();
@@ -79,10 +79,8 @@ const Blogs = () => {
 
   return (
     <>
-      <Helmet>
-        <title>Blogs</title>
-        <meta name="description" content="Read our latest blogs and know the latest trends in software and technology" />
-      </Helmet>
+      <Title>Blogs</Title>
+      <Meta name="description" content="Read our latest blogs and know the latest trends in software and technology" />
       <div className="min-h-screen">
         <header className="bg-white">
           <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">

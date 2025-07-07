@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../utils/AuthConext";
 import { useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import { Title,Meta } from "react-head";
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 import { FileText, Image,  Type } from "lucide-react";
 import axiosInstance from "../utils/axiosInstance";
 
@@ -79,13 +79,8 @@ function AddBlog() {
 
   return (
     <>
-      <Helmet>
-        <title>Add Blog | Learning Hub</title>
-        <meta
-          name="description"
-          content="Create and publish new blog articles"
-        />
-      </Helmet>
+      <Title>Add Blog | Learning Hub</Title>
+      <Meta name="description" content="Create and publish new blog articles" />
       <div className="min-h-screen bg-slate-50">
         <div className="max-w-4xl mx-auto px-4 py-12 md:px-8 space-y-8">
           <div className="text-center">

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/axiosInstance.js';
 import { Map, Search,   AlertCircle, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCurrentLocation } from '../utils/useFulFunctions.js';
-import { Helmet } from 'react-helmet-async';
+import { Title, Meta } from 'react-head';
 
 const ITEMS_PER_PAGE = 6;
 const DEBOUNCE_DELAY = 300;
@@ -145,16 +145,14 @@ function Roadmaps() {
 
   return (
     <>
-      <Helmet>
-        <title>Learning Roadmaps | Education Hub</title>
-        <meta name="description" content="Explore structured learning paths to guide your journey from beginner to expert in various skills and technologies." />
-        <link rel="canonical" href={currentUrl} />
-      </Helmet>
+      <Title>Learning Roadmaps | Education Hub</Title>
+      <Meta name="description" content="Explore structured learning paths to guide your journey from beginner to expert in various skills and technologies." />
+      <Meta rel="canonical" href={currentUrl} />
       <div className="min-h-screen">
         <div className="max-w-7xl mx-auto px-4 py-16 md:px-8 space-y-12">
           {/* Hero Section */}
           <div className="text-center space-y-6">
-            <h1 className="text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
+            <h1 className="text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 p-6">
               Learning Roadmaps
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">

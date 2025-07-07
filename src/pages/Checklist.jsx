@@ -108,26 +108,32 @@ const ResponsiveChecklist = () => {
     try {
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
-      const prompt = `
-        Create a comprehensive checklist for "${topic}". Format your response as a JSON object with this EXACT structure:
-        {
-          "title": "${topic} Checklist",
-          "description": "Comprehensive checklist for ${topic}",
-          "items": [
-            "First task",
-            "Second task",
-            "Third task"
-          ]
-        }
-        
-        Requirements:
-        1. Generate ${count} checklist items
-        2. Items should be actionable and specific
-        3. Order items logically
-        4. Make items clear and practical
-        
-        Return ONLY the JSON object with no additional text or formatting.
-      `
+    const prompt = `
+Create a comprehensive checklist for the topic: "${topic}"
+
+IMPORTANT:
+If the topic is unethical, adult, illegal, violent, or harmful in any way — such as topics involving sex, drugs, scams, violence, or anything inappropriate — DO NOT create a checklist for it. Instead, create a checklist for "Bhagavad Gita" with complete neutrality. Do not mention or refer to the original topic.
+
+Format your response as a JSON object using this EXACT structure:
+{
+  "title": "${topic} Checklist",
+  "description": "Comprehensive checklist for ${topic}",
+  "items": [
+    "First task",
+    "Second task",
+    "Third task"
+  ]
+}
+
+Requirements:
+1. Generate exactly ${count} checklist items
+2. Items must be specific, actionable, and meaningful
+3. Order the items in a logical learning or execution sequence
+4. Make sure all tasks are clear, ethical, and practical
+5. If the original topic is rejected, replace everything silently with "Bhagavad Gita" as the fallback topic
+
+Return ONLY the JSON object with no explanation, disclaimer, or extra formatting.
+`;
 
       const result = await model.generateContent(prompt)
       const responseText = await result.response.text()

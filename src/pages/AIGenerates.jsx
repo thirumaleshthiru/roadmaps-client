@@ -435,45 +435,47 @@ function AIGenerated() {
       // Generate a unique roadmap ID
       const roadmapId = Date.now();
       
-      const prompt = `
-        Create a comprehensive learning roadmap for ${topic}. Format your response as a JSON object following this EXACT structure:
-        {
-          "roadmap_id": ${roadmapId},
-          "roadmap_name": "${topic}",
-          "roadmap_description": "What is ${topic}'s in 50 words",
-          "created_at": "${new Date().toISOString()}",
-          "meta_title": "${topic}-roadmap",
-          "meta_description": "A comprehensive step-by-step guide to learning ${topic}",
-          "concepts": [
-            {
-              "concept_id": 1,
-              "concept_name": "Introduction to ${topic}",
-              "concept_description": "A brief overview of what ${topic} is and why it matters",
-              "concept_details": "Brief Summary :\nA very brief and comprehensive summary of this concept in 300 words minimum and 400 maximum.\n\nKey Concepts:\n- First key concept\n- Second key concept\n- Third key concept\n- Fourth key concept\n\nExamples:\n- Practical example 1\n- Practical example 2\n- Practical example 3",
-              "roadmap_id": ${roadmapId}
-            }
-            // IMPORTANT: Include 20-25 concepts total, covering everything from absolute basics to advanced topics
-          ]
-        }
+   const prompt = `
+Create a comprehensive learning roadmap for the topic: **${topic}**
 
-        CRITICAL REQUIREMENTS:
-        1. Generate 20-25 concepts that cover the COMPLETE learning journey from absolute beginner to advanced practitioner
-        2. Each concept must build logically on previous concepts
-        3. For concept_details, use ONLY this exact format:
-           - Summary: (300 words minimum 500 words maximum) -  comprehensive
-           - Key Concepts: complete bullet points of the most important concepts
-           - Examples: 3-4 practical examples or use cases
-        4. Keep everything concise and focused 
-        5. The first few concepts MUST be suitable for complete beginners with no prior knowledge next will be intermediate
-        6. The final 5 concepts should cover advanced topics that professionals would need to know
-        7. Each section should be separated by double newlines
-        8. Use simple bullet points with dashes for lists
-        9. Make sure Brief Summary is truly brief but covers the essence of the concept
-        10. Key Concepts should be the core things someone needs to understand
-        11. Examples should be practical, real-world applications or use cases
-        
-        Return ONLY the JSON object with no additional text or formatting.
-      `;
+IMPORTANT:
+If the topic is adult, unethical, illegal, violent, self harm or harmful in any way — such as topics involving sex, drugs, violence, scams, or anything inappropriate — DO NOT generate a roadmap for it. Instead, generate a complete roadmap for "Bhagavad Gita" by default, without mentioning or referencing the original topic at all.
+
+Format your response as a JSON object using EXACTLY the following structure:
+{
+  "roadmap_id": ${roadmapId},
+  "roadmap_name": "${topic}",
+  "roadmap_description": "${topic}'s description in 50 words",
+  "created_at": "${new Date().toISOString()}",
+  "meta_title": "${topic}-roadmap",
+  "meta_description": "A comprehensive step-by-step guide to learning ${topic}",
+  "concepts": [
+    {
+      "concept_id": 1,
+      "concept_name": "Introduction to ${topic}",
+      "concept_description": "A brief overview of what ${topic} is and why it matters",
+      "concept_details": "Brief Summary:\nA very brief and comprehensive summary of this concept in 300–500 words.\n\nKey Concepts:\n- First key concept\n- Second key concept\n- Third key concept\n- Fourth key concept\n\nExamples:\n- Practical example 1\n- Practical example 2\n- Practical example 3",
+      "roadmap_id": ${roadmapId}
+    }
+    // Include 20–25 concepts total, covering everything from absolute basics to advanced topics
+  ]
+}
+
+STRICT REQUIREMENTS:
+1. If the topic is harmful or inappropriate, IGNORE it and use "Bhagavad Gita" instead.
+2. Generate 20–25 concepts that cover the COMPLETE learning journey from beginner to advanced.
+3. Each concept must build logically on previous concepts.
+4. For concept_details, use ONLY this exact format:
+   - Summary: (300–500 words) – must be clear and comprehensive.
+   - Key Concepts: bullet points of essential ideas.
+   - Examples: 3–4 practical real-world examples or use cases.
+5. Start from complete beginner concepts with no prior knowledge assumed.
+6. Final concepts should cover advanced professional-level topics.
+7. Use double newlines between each concept block.
+8. Use plain bullet points (–) for all lists.
+9. Make each concept concise, structured, and informative.
+10. Return ONLY the JSON object. Do NOT include any explanation, disclaimer, or extra text.
+`;
 
       setGenerationProgress(30);
       const result = await model.generateContent(prompt);
@@ -616,9 +618,14 @@ function AIGenerated() {
   // Main content - always show the form at the top
   return (
     <>
-      <Title>{roadmap ? `Expert ${roadmap.roadmap_name} Learning Roadmap` : "AI-Generated Learning Roadmaps"}</Title>
-      <Meta name="description" content={roadmap ? roadmap.roadmap_description : "Generate comprehensive learning roadmaps for any topic using AI"} />
-      <Meta rel="canonical" href={currentUrl} />
+      <Helmet>
+        <title>{roadmap ? `Expert ${roadmap.roadmap_name} Learning Roadmap` : "AI-Generated Learning Roadmaps"}</title>
+        <meta
+          name="description"
+          content={roadmap ? roadmap.roadmap_description : "Generate comprehensive learning roadmaps for any topic using AI"}
+        />
+        <link rel="canonical" href={currentUrl} />
+      </Helmet>
 
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl shadow-xl p-8 mb-12">

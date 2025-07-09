@@ -438,8 +438,6 @@ function AIGenerated() {
    const prompt = `
 Create a comprehensive learning roadmap for the topic: **${topic}**
 
-IMPORTANT:
-If the topic is adult, unethical, illegal, violent, self harm or harmful in any way — such as topics involving sex, drugs, violence, scams, or anything inappropriate — DO NOT generate a roadmap for it. Instead, generate a complete roadmap for "Bhagavad Gita" by default, without mentioning or referencing the original topic at all.
 
 Format your response as a JSON object using EXACTLY the following structure:
 {
@@ -454,25 +452,29 @@ Format your response as a JSON object using EXACTLY the following structure:
       "concept_id": 1,
       "concept_name": "Introduction to ${topic}",
       "concept_description": "A brief overview of what ${topic} is and why it matters",
-      "concept_details": "Brief Summary:\nA very brief and comprehensive summary of this concept in 300–500 words.\n\nKey Concepts:\n- First key concept\n- Second key concept\n- Third key concept\n- Fourth key concept\n\nExamples:\n- Practical example 1\n- Practical example 2\n- Practical example 3",
+      "concept_details": "Brief Summary:\nA very brief and comprehensive summary of this concept in 300-500 words.\n\nKey Concepts:\n- First key concept\n- Second key concept\n- Third key concept\n- Fourth key concept\n\nExamples:\n- Practical example 1\n- Practical example 2\n- Practical example 3",
       "roadmap_id": ${roadmapId}
     }
-    // Include 20–25 concepts total, covering everything from absolute basics to advanced topics
+    // Include 20-25 concepts total, covering everything from absolute basics to advanced topics
   ]
 }
 
+IMPORTANT:
+If the topic is adult, unethical, illegal, violent, self harm or harmful in any way — such as topics involving sex, drugs, violence, scams, or anything inappropriate — DO NOT generate a roadmap for it. Instead, generate a complete roadmap for "Bhagavad Gita" by default, without mentioning or referencing the original topic at all.
+
+
 STRICT REQUIREMENTS:
 1. If the topic is harmful or inappropriate, IGNORE it and use "Bhagavad Gita" instead.
-2. Generate 20–25 concepts that cover the COMPLETE learning journey from beginner to advanced.
+2. Generate 20-25 concepts that cover the COMPLETE learning journey from beginner to advanced.
 3. Each concept must build logically on previous concepts.
 4. For concept_details, use ONLY this exact format:
-   - Summary: (300–500 words) – must be clear and comprehensive.
+   - Summary: (300-500 words) - must be clear and comprehensive.
    - Key Concepts: bullet points of essential ideas.
-   - Examples: 3–4 practical real-world examples or use cases.
+   - Examples: 3-4 practical real-world examples or use cases.
 5. Start from complete beginner concepts with no prior knowledge assumed.
 6. Final concepts should cover advanced professional-level topics.
 7. Use double newlines between each concept block.
-8. Use plain bullet points (–) for all lists.
+8. Use plain bullet points (-) for all lists.
 9. Make each concept concise, structured, and informative.
 10. Return ONLY the JSON object. Do NOT include any explanation, disclaimer, or extra text.
 `;
@@ -618,14 +620,9 @@ STRICT REQUIREMENTS:
   // Main content - always show the form at the top
   return (
     <>
-      <Helmet>
-        <title>{roadmap ? `Expert ${roadmap.roadmap_name} Learning Roadmap` : "AI-Generated Learning Roadmaps"}</title>
-        <meta
-          name="description"
-          content={roadmap ? roadmap.roadmap_description : "Generate comprehensive learning roadmaps for any topic using AI"}
-        />
-        <link rel="canonical" href={currentUrl} />
-      </Helmet>
+      <Title>{roadmap ? `Expert ${roadmap.roadmap_name} Learning Roadmap` : "AI-Generated Learning Roadmaps"}</Title>
+      <Meta name="description" content={roadmap ? roadmap.roadmap_description : "Generate comprehensive learning roadmaps for any topic using AI"} />
+      <Meta rel="canonical" href={currentUrl} />
 
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl shadow-xl p-8 mb-12">

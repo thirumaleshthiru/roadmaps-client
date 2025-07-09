@@ -1,5 +1,4 @@
-"use client"
-
+ 
 import { useState, useEffect } from "react"
 import { Plus, CheckCircle2, Square, Trash2, X, ChevronDown, ChevronRight, BarChart3 } from "lucide-react"
 import { GoogleGenerativeAI } from "@google/generative-ai"
@@ -111,8 +110,6 @@ const ResponsiveChecklist = () => {
     const prompt = `
 Create a comprehensive checklist for the topic: "${topic}"
 
-IMPORTANT:
-If the topic is unethical, adult, illegal, violent, or harmful in any way — such as topics involving sex, drugs, scams, violence, or anything inappropriate — DO NOT create a checklist for it. Instead, create a checklist for "Bhagavad Gita" with complete neutrality. Do not mention or refer to the original topic.
 
 Format your response as a JSON object using this EXACT structure:
 {
@@ -125,13 +122,16 @@ Format your response as a JSON object using this EXACT structure:
   ]
 }
 
+IMPORTANT:
+If the topic is unethical, adult, illegal, violent, or harmful in any way — such as topics involving sex, drugs, scams, violence, or anything inappropriate — DO NOT create a checklist for it. Instead, create a checklist for "Bhagavad Gita" with complete neutrality. Do not mention or refer to the original topic.
+
+
 Requirements:
 1. Generate exactly ${count} checklist items
 2. Items must be specific, actionable, and meaningful
 3. Order the items in a logical learning or execution sequence
 4. Make sure all tasks are clear, ethical, and practical
-5. If the original topic is rejected, replace everything silently with "Bhagavad Gita" as the fallback topic
-
+ 
 Return ONLY the JSON object with no explanation, disclaimer, or extra formatting.
 `;
 
@@ -158,7 +158,7 @@ Return ONLY the JSON object with no explanation, disclaimer, or extra formatting
           })),
         }
 
-        setChecklists((prev) => [...prev, newChecklist])
+        setChecklists((prev) => [newChecklist, ...prev])
         setExpandedTopics((prev) => ({ ...prev, [newChecklist.id]: true }))
       } catch (jsonError) {
         console.error("Error parsing AI response:", jsonError)
@@ -186,7 +186,7 @@ Return ONLY the JSON object with no explanation, disclaimer, or extra formatting
               })),
             }
 
-            setChecklists((prev) => [...prev, newChecklist])
+            setChecklists((prev) => [newChecklist, ...prev])
             setExpandedTopics((prev) => ({ ...prev, [newChecklist.id]: true }))
           } else {
             setError("Something is not right use again")
@@ -264,7 +264,7 @@ Return ONLY the JSON object with no explanation, disclaimer, or extra formatting
           createdAt: new Date().toISOString(),
           subtopics: [],
         }
-        setChecklists((prev) => [...prev, newTopic])
+        setChecklists((prev) => [newTopic, ...prev]) // Changed to add to front
         setExpandedTopics((prev) => ({ ...prev, [newTopic.id]: true }))
       } else if (modalType === "subtopic") {
         const newSubtopic = {

@@ -24,9 +24,15 @@ color: blue;
     text-decoration: underline;
     color: blue;
 }
-pre{
-background-color: rgb(27, 27, 27);color: white;padding: 15px;border-radius: 18px;width: 100%;overflow: auto;
+pre,.ql-code-block-container{
+background-color: rgb(27, 27, 27);color: white;padding: 15px;border-radius: 18px;width: 100%;overflow: auto;margin: 10px;
 }
 code{
 font-weight: bold;
+}
+ul, ol {
+   @apply list-inside list-disc my-4;
+}
+li {
+   @apply mb-2;
 }

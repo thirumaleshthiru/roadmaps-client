@@ -429,7 +429,7 @@ function AIGenerated() {
     setGenerationProgress(10);
     
     try {
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
       setGenerationProgress(20);
       
       // Generate a unique roadmap ID
@@ -470,13 +470,14 @@ STRICT REQUIREMENTS:
 4. For concept_details, use ONLY this exact format:
    - Summary: (300-500 words) - must be clear and comprehensive.
    - Key Concepts: bullet points of essential ideas.
-   - Examples: 3-4 practical real-world examples or use cases.
+   - Examples: 5-7 practical real-world examples or use cases.
 5. Start from complete beginner concepts with no prior knowledge assumed.
 6. Final concepts should cover advanced professional-level topics.
 7. Use double newlines between each concept block.
 8. Use plain bullet points (-) for all lists.
 9. Make each concept concise, structured, and informative.
 10. Return ONLY the JSON object. Do NOT include any explanation, disclaimer, or extra text.
+11. “If a hands-on project is genuinely needed for mastering the topic, include it as the final concept using the same structure as other concepts. Do not include a project if it doesn't add practical value.
 `;
 
       setGenerationProgress(30);

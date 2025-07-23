@@ -19,8 +19,9 @@ import Post from '../pages/Post';
 import Blogs from '../pages/Blogs';
 import EditBlog from '../pages/EditBlog';
 import AIGenerated from '../pages/AIGenerates';
- 
-import Checklist from '../pages/Checklist';
+ import Checklist from '../pages/Checklist';
+ import ConceptCoach from '../pages/ConceptCoach';
+
 function Routex() {
 return (
 <Routes>
@@ -42,10 +43,10 @@ return (
 <Route  path='/resources' element={<Resources/>}/>
 <Route  path='/post/:postname/:blog_id' element={<Post/>}/>
 <Route path='/editblog/:id' element={<EditBlog />}/>
- 
-<Route path='/ai-generated-roadmaps' element={<AIGenerated />}/>
- <Route path='/checklist' element={<Checklist/>}/>
 
+<Route path='/ai-generated-roadmaps' element={<AIGenerated />}/>
+<Route path='/checklist' element={<Checklist/>}/>
+<Route path='/ai-concept-coach' element={<ConceptCoach/>}/>
 
 </Routes>
 )

@@ -35,7 +35,7 @@ function CustomNavbar() {
 
   return (
     <nav className="bg-white shadow-sm sticky top-0 z-50">
-      <div className="container mx-auto px-6 flex items-center justify-between h-20 gap-6 font-medium">
+      <div className="container mx-auto px-6 flex items-center justify-between h-20 gap-6">
         <Link to="/" className="text-2xl font-bold flex items-center">
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
             EasyRoadmaps

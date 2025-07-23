@@ -105,7 +105,7 @@ const ResponsiveChecklist = () => {
     setError(null)
 
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" })
 
     const prompt = `
 Create a comprehensive checklist for the topic: "${topic}"

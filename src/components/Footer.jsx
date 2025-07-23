@@ -18,7 +18,7 @@ const Footer = () => {
           {/* Quick Links */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
-            <ul className="text-sm text-gray-400 space-y-2">
+            <ul className="text-sm text-gray-400 space-y-2 list-none">
               <li>
                  <Link to="/roadmaps" className="hover:text-white">
                    Explore Roadmaps
@@ -41,7 +41,7 @@ const Footer = () => {
           {/* Contact Section */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
-            <p className="text-sm text-gray-400">Email: methirumaleshgandam@gmail.com</p>
+            <p className="text-sm text-gray-400">Email: <a href="malto:easyroadmaps.feedback@gmail.com">easyroadmaps.feedback@gmail.com</a></p>
           </div>
         </div>
         

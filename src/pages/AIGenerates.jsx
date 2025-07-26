@@ -483,7 +483,7 @@ function AIGenerated() {
 
     try {
       const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-flash",
+        model: "gemini-2.5-flash-lite",
       })
       setGenerationProgress(20)
 

@@ -23,7 +23,7 @@ function Concept({ concept, index, onClick, marked, onMarkToggle, totalConcepts 
             p-3 rounded-xl bg-white cursor-pointer 
             transform transition-all duration-300 
             hover:scale-102 hover:shadow-2xl 
-            ${marked ? "border-l-4 border-green-500" : "border-l-4 border-transparent"} 
+            ${marked ? "border-l-4 border-green-500" : "border-l-4 border-transparent"}
             relative overflow-hidden 
             shadow-[0_3px_10px_rgb(0,0,0,0.2)]
           `}
@@ -31,35 +31,30 @@ function Concept({ concept, index, onClick, marked, onMarkToggle, totalConcepts 
         >
           {/* Concept Title */}
           <h3 className="text-xl font-bold text-gray-800 mb-3 pr-8">{concept.concept_name}</h3>
-
           {/* Progress Indicator */}
           {marked && (
             <div className="absolute top-0 right-0 bg-green-500 text-white p-2 rounded-bl-lg">
               <Check size={16} />
             </div>
           )}
-
           {/* Concept Description */}
           <p className="text-gray-600 text-sm md:text-base">
             {concept.concept_description?.substring(0, 120)}
             {concept.concept_description?.length > 120 ? "..." : ""}
           </p>
-
           {/* Card Footer */}
           <div className="mt-4 flex items-center justify-between text-sm">
             <span className="text-indigo-600 font-medium flex items-center">Learn more</span>
-
             <span className="text-gray-500">{marked ? "Completed" : "Not started"}</span>
           </div>
         </div>
       </div>
-
       {/* Center Timeline Marker */}
       <div className="w-full md:w-2/12 flex justify-center relative">
         <button
           className={`
             w-12 h-12 rounded-full 
-            ${marked ? "bg-green-500" : "bg-white border-2 border-indigo-500"} 
+            ${marked ? "bg-green-500" : "bg-white border-2 border-indigo-500"}
             shadow-lg z-20 flex items-center justify-center 
             cursor-pointer transition-all duration-300 
             hover:scale-110 focus:outline-none
@@ -73,7 +68,6 @@ function Concept({ concept, index, onClick, marked, onMarkToggle, totalConcepts 
             <span className="font-bold text-indigo-500">{index + 1}</span>
           )}
         </button>
-
         {/* Timeline Connector */}
         {!isLast && (
           <div
@@ -82,7 +76,6 @@ function Concept({ concept, index, onClick, marked, onMarkToggle, totalConcepts 
           ></div>
         )}
       </div>
-
       {/* Empty Space for Layout */}
       <div className="w-full md:w-5/12"></div>
     </div>
@@ -144,7 +137,6 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
   // Function to format text with markdown-like syntax
   const formatText = useCallback((text) => {
     if (!text) return ""
-
     // Convert markdown to HTML
     const formattedText = text
       // Handle code blocks first (to avoid conflicts with bold formatting)
@@ -193,6 +185,7 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
           .split("\n")
           .filter((c) => c.trim())
           .map((c) => c.replace(/^[-•*]\s*/, ""))
+
         return (
           <div key={index} className="mb-8">
             <h3 className="text-lg font-medium text-gray-800 mb-4">Key Concepts</h3>
@@ -218,6 +211,7 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
           .split("\n")
           .filter((e) => e.trim())
           .map((e) => e.replace(/^[-•*]\s*/, ""))
+
         return (
           <div key={index} className="mb-8">
             <h3 className="text-lg font-medium text-gray-800 mb-4">Examples</h3>
@@ -342,7 +336,6 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
               {concept.concept_name}
             </h2>
           </div>
-
           <button
             className="flex-shrink-0 p-2 rounded-full hover:bg-gray-100/60 transition-all duration-200 text-gray-600 hover:text-gray-700"
             onClick={handleClose}
@@ -389,7 +382,6 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
                 Resources
               </a>
             )}
-
             <button
               className={`flex-1 sm:flex-initial inline-flex items-center justify-center px-6 py-3
                         text-sm font-medium rounded-2xl transition-all duration-200
@@ -403,7 +395,6 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
               <Check size={16} className="mr-2" />
               {marked ? "Completed" : "Mark Complete"}
             </button>
-
             <button
               className="flex-1 sm:flex-initial inline-flex items-center justify-center px-6 py-3
                        bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium
@@ -455,16 +446,193 @@ function AIGenerated() {
     }
   }
 
+  // Enhanced JSON sanitization and parsing function
+  const parseAIResponse = (responseText) => {
+    console.log("Raw AI response length:", responseText.length)
+
+    // Step 1: Clean the response text
+    const cleanedText = responseText
+      .replace(/```json|```/g, "") // Remove code block markers
+      .replace(/^\uFEFF/, "") // Remove BOM
+      .replace(/[\u0000-\u001F\u007F-\u009F]/g, "") // Remove control characters
+      .trim()
+
+    console.log("Cleaned text length:", cleanedText.length)
+
+    // Step 2: Find JSON boundaries
+    const firstBrace = cleanedText.indexOf("{")
+    const lastBrace = cleanedText.lastIndexOf("}")
+
+    if (firstBrace === -1 || lastBrace === -1 || firstBrace >= lastBrace) {
+      throw new Error("No valid JSON structure found in response")
+    }
+
+    const jsonContent = cleanedText.substring(firstBrace, lastBrace + 1)
+    console.log("Extracted JSON length:", jsonContent.length)
+
+    // Step 3: Apply multiple cleaning strategies
+    const cleaningStrategies = [
+      // Strategy 1: Basic cleaning
+      (text) =>
+        text
+          .replace(/,(\s*[}\]])/g, "$1") // Remove trailing commas
+          .replace(/([{,]\s*)(\w+):/g, '$1"$2":') // Quote unquoted keys
+          .replace(/:\s*'([^']*)'/g, ': "$1"'), // Replace single quotes
+
+      // Strategy 2: Fix string values with newlines
+      (text) => {
+        const lines = text.split("\n")
+        return lines
+          .map((line, index) => {
+            if (line.includes(":") && line.includes('"')) {
+              const colonIndex = line.indexOf(":")
+              const beforeColon = line.substring(0, colonIndex + 1)
+              const afterColon = line.substring(colonIndex + 1).trim()
+
+              if (afterColon.startsWith('"')) {
+                // Find proper string boundaries and escape content
+                let inString = false
+                let escaped = false
+                let result = beforeColon + ' "'
+
+                for (let i = 1; i < afterColon.length; i++) {
+                  const char = afterColon[i]
+
+                  if (!inString && char === '"') {
+                    inString = true
+                    continue
+                  }
+
+                  if (inString) {
+                    if (escaped) {
+                      result += char
+                      escaped = false
+                    } else if (char === "\\") {
+                      result += "\\\\"
+                      escaped = true
+                    } else if (char === '"') {
+                      result += '"' + afterColon.substring(i + 1)
+                      break
+                    } else if (char === "\n") {
+                      result += "\\n"
+                    } else if (char === "\r") {
+                      result += "\\r"
+                    } else if (char === "\t") {
+                      result += "\\t"
+                    } else {
+                      result += char
+                    }
+                  }
+                }
+
+                return result
+              }
+            }
+            return line
+          })
+          .join("\n")
+      },
+
+      // Strategy 3: Handle malformed arrays and objects
+      (text) => {
+        // Fix missing commas between array elements
+        text = text.replace(/}\s*{/g, "}, {")
+        // Fix missing commas between object properties
+        text = text.replace(/"\s*"/g, '", "')
+        return text
+      },
+    ]
+
+    // Step 4: Try each cleaning strategy
+    for (let i = 0; i < cleaningStrategies.length; i++) {
+      try {
+        const cleanedJson = cleaningStrategies[i](jsonContent)
+        const parsed = JSON.parse(cleanedJson)
+
+        // Validate the structure
+        if (parsed && typeof parsed === "object" && parsed.roadmap_id && Array.isArray(parsed.concepts)) {
+          console.log(`Successfully parsed with strategy ${i + 1}`)
+          return parsed
+        }
+      } catch (strategyError) {
+        console.log(`Strategy ${i + 1} failed:`, strategyError.message)
+        continue
+      }
+    }
+
+    // Step 5: Last resort - try to extract and reconstruct JSON manually
+    try {
+      console.log("Attempting manual JSON reconstruction...")
+
+      // Extract key components using regex
+      const roadmapIdMatch = cleanedText.match(/"roadmap_id":\s*(\d+)/)
+      const roadmapNameMatch = cleanedText.match(/"roadmap_name":\s*"([^"]*)"/)
+      const roadmapDescMatch = cleanedText.match(/"roadmap_description":\s*"([^"]*)"/)
+
+      if (!roadmapIdMatch || !roadmapNameMatch) {
+        throw new Error("Could not extract essential roadmap data")
+      }
+
+      // Try to extract concepts array
+      const conceptsMatch = cleanedText.match(/"concepts":\s*\[(.*)\]/s)
+      if (!conceptsMatch) {
+        throw new Error("Could not extract concepts array")
+      }
+
+      // Build a minimal valid structure
+      const fallbackRoadmap = {
+        roadmap_id: Number.parseInt(roadmapIdMatch[1]),
+        roadmap_name: roadmapNameMatch[1],
+        roadmap_description: roadmapDescMatch ? roadmapDescMatch[1] : `Learn ${roadmapNameMatch[1]} step by step`,
+        created_at: new Date().toISOString(),
+        meta_title: `${roadmapNameMatch[1]}-roadmap`,
+        meta_description: `A comprehensive step-by-step guide to learning ${roadmapNameMatch[1]}`,
+        concepts: [],
+      }
+
+      // Try to extract individual concepts
+      const conceptMatches = [...conceptsMatch[1].matchAll(/{[^}]*"concept_id":\s*(\d+)[^}]*}/g)]
+
+      conceptMatches.forEach((match, index) => {
+        try {
+          const conceptText = match[0]
+          const conceptId = Number.parseInt(match[1])
+          const nameMatch = conceptText.match(/"concept_name":\s*"([^"]*)"/)
+          const descMatch = conceptText.match(/"concept_description":\s*"([^"]*)"/)
+
+          if (nameMatch) {
+            fallbackRoadmap.concepts.push({
+              concept_id: conceptId,
+              concept_name: nameMatch[1],
+              concept_description: descMatch ? descMatch[1] : `Learn about ${nameMatch[1]}`,
+              concept_details: `Brief Summary: This concept covers ${nameMatch[1]}. Key Concepts: - Understanding the basics - Practical applications - Best practices Examples: - Example 1 - Example 2 - Example 3`,
+              roadmap_id: fallbackRoadmap.roadmap_id,
+            })
+          }
+        } catch (conceptError) {
+          console.log(`Failed to parse concept ${index + 1}:`, conceptError.message)
+        }
+      })
+
+      if (fallbackRoadmap.concepts.length > 0) {
+        console.log(`Fallback reconstruction successful with ${fallbackRoadmap.concepts.length} concepts`)
+        return fallbackRoadmap
+      }
+    } catch (fallbackError) {
+      console.error("Fallback reconstruction failed:", fallbackError.message)
+    }
+
+    throw new Error("All JSON parsing strategies failed")
+  }
+
   useEffect(() => {
     window.scrollTo(0, 0)
-
     // Try to load the last generated roadmap
     try {
       const lastRoadmap = localStorage.getItem("lastGeneratedRoadmap")
       if (lastRoadmap) {
         const parsedRoadmap = JSON.parse(lastRoadmap)
         setRoadmap(parsedRoadmap)
-
         // Load marked concepts for this roadmap
         if (parsedRoadmap && parsedRoadmap.roadmap_id) {
           const conceptsForRoadmap = loadMarkedConcepts(parsedRoadmap.roadmap_id)
@@ -483,22 +651,22 @@ function AIGenerated() {
 
     try {
       const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-flash-lite",
+        model: "gemini-2.5-flash",
       })
+
       setGenerationProgress(20)
 
       // Generate a unique roadmap ID
       const roadmapId = Date.now()
 
-      const prompt = `
-Create a comprehensive learning roadmap for the topic: **${topic}**
+      const prompt = `Create a comprehensive learning roadmap for the topic: **${topic}**
 
 Format your response as a JSON object using EXACTLY the following structure:
 
 {
   "roadmap_id": ${roadmapId},
   "roadmap_name": "${topic}",
-  "roadmap_description": "${topic}'s description in 50 words",
+  "roadmap_description": "${topic} description in 50 words",
   "created_at": "${new Date().toISOString()}",
   "meta_title": "${topic}-roadmap",
   "meta_description": "A comprehensive step-by-step guide to learning ${topic}",
@@ -507,10 +675,9 @@ Format your response as a JSON object using EXACTLY the following structure:
       "concept_id": 1,
       "concept_name": "Introduction to ${topic}",
       "concept_description": "A brief overview of what ${topic} is and why it matters",
-      "concept_details": "Brief Summary:\nA very brief and comprehensive summary of this concept in 300-500 words.\n\nKey Concepts:\n- First key concept\n- Second key concept\n- Third key concept\n- Fourth key concept\n\nExamples:\n- Practical example 1\n- Practical example 2\n- Practical example 3",
+      "concept_details": "Brief Summary: A very brief and comprehensive summary of this concept in 300-500 words. Key Concepts: - First key concept - Second key concept - Third key concept - Fourth key concept Examples: - Practical example 1 - Practical example 2 - Practical example 3",
       "roadmap_id": ${roadmapId}
     }
-    // Include 20-25 concepts total, covering everything from absolute basics to advanced topics
   ]
 }
 
@@ -530,58 +697,76 @@ STRICT REQUIREMENTS:
 8. Use plain bullet points (-) for all lists.
 9. Make each concept concise, structured, and informative.
 10. Return ONLY the JSON object. Do NOT include any explanation, disclaimer, or extra text.
-11. "If a hands-on project is genuinely needed for mastering the topic, include it as the final concept using the same structure as other concepts. Do not include a project if it doesn't add practical value.
-`
+11. If a hands-on project is genuinely needed for mastering the topic, include it as the final concept using the same structure as other concepts. Do not include a project if it doesn't add practical value.
+
+Make sure the JSON is valid and all strings are properly escaped.`
 
       setGenerationProgress(30)
+
       const result = await model.generateContent(prompt)
       setGenerationProgress(70)
+
       const responseText = await result.response.text()
       setGenerationProgress(80)
 
       try {
-        // Extract JSON from the response
-        const jsonStr = responseText.replace(/```json|```/g, "").trim()
-        const roadmapData = JSON.parse(jsonStr)
+        // Use the enhanced parsing function
+        const roadmapData = parseAIResponse(responseText)
+
+        // Additional validation
+        if (!roadmapData.roadmap_id || !roadmapData.concepts || !Array.isArray(roadmapData.concepts)) {
+          throw new Error("Invalid roadmap structure after parsing")
+        }
+
+        if (roadmapData.concepts.length === 0) {
+          throw new Error("No concepts found in roadmap")
+        }
 
         // Save to localStorage as the last generated roadmap
         localStorage.setItem("lastGeneratedRoadmap", JSON.stringify(roadmapData))
 
         // Reset marked concepts for this new roadmap
         setMarkedConcepts([])
-
         setRoadmap(roadmapData)
         setGenerationProgress(100)
-      } catch (jsonError) {
-        console.error("Error parsing AI response:", jsonError)
-        // Try to extract JSON with a more lenient approach
-        try {
-          const jsonStartIndex = responseText.indexOf("{")
-          const jsonEndIndex = responseText.lastIndexOf("}")
-          if (jsonStartIndex >= 0 && jsonEndIndex >= 0) {
-            const extractedJson = responseText.substring(jsonStartIndex, jsonEndIndex + 1)
-            const roadmapData = JSON.parse(extractedJson)
+        setError(null)
 
-            // Save to localStorage as the last generated roadmap
-            localStorage.setItem("lastGeneratedRoadmap", JSON.stringify(roadmapData))
+        console.log(`Successfully generated roadmap with ${roadmapData.concepts.length} concepts`)
+      } catch (parseError) {
+        console.error("Enhanced parsing failed:", parseError)
 
-            // Reset marked concepts for this new roadmap
-            setMarkedConcepts([])
-
-            setRoadmap(roadmapData)
-            setError(null)
-            setGenerationProgress(100)
-          } else {
-            setError("Failed to generate roadmap. Please try again with a different topic.")
-          }
-        } catch (fallbackError) {
-          console.error("Fallback extraction failed:", fallbackError)
-          setError("Failed to generate roadmap. Please try again with a different topic.")
+        // Create a basic fallback roadmap
+        const fallbackRoadmap = {
+          roadmap_id: roadmapId,
+          roadmap_name: topic,
+          roadmap_description: `A comprehensive learning guide for ${topic}`,
+          created_at: new Date().toISOString(),
+          meta_title: `${topic}-roadmap`,
+          meta_description: `Learn ${topic} step by step`,
+          concepts: [
+            {
+              concept_id: 1,
+              concept_name: `Introduction to ${topic}`,
+              concept_description: `Get started with ${topic} fundamentals`,
+              concept_details: `Brief Summary: This is an introduction to ${topic}. We'll cover the basic concepts and get you started on your learning journey. Key Concepts: - Understanding what ${topic} is - Why ${topic} is important - Basic terminology - Getting started Examples: - Real-world applications - Common use cases - Getting started resources`,
+              roadmap_id: roadmapId,
+            },
+          ],
         }
+
+        localStorage.setItem("lastGeneratedRoadmap", JSON.stringify(fallbackRoadmap))
+        setMarkedConcepts([])
+        setRoadmap(fallbackRoadmap)
+        setError(
+          "Generated a basic roadmap. The AI response had formatting issues, but we created a starting point for you. Try generating again for a more detailed roadmap.",
+        )
+        setGenerationProgress(100)
       }
     } catch (err) {
       console.error("Error generating roadmap:", err)
-      setError("Failed to generate roadmap. Please try again later.")
+      setError(
+        "Failed to generate roadmap. Please check your internet connection and try again. If the problem persists, try a different topic.",
+      )
     } finally {
       setIsLoading(false)
     }
@@ -609,7 +794,6 @@ STRICT REQUIREMENTS:
     if (!roadmap || !roadmap.roadmap_id) return
 
     let updatedMarkedConcepts
-
     if (markedConcepts.includes(conceptId)) {
       updatedMarkedConcepts = markedConcepts.filter((id) => id !== conceptId)
     } else {
@@ -653,14 +837,27 @@ STRICT REQUIREMENTS:
 
   if (error) {
     return (
-      <div className="flex flex-col justify-center items-center h-screen">
-        <div className="text-red-500 text-xl font-semibold mb-4">{error}</div>
-        <button
-          className="px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 transition-colors"
-          onClick={() => setError(null)}
-        >
-          Try Again
-        </button>
+      <div className="flex flex-col justify-center items-center h-screen px-4">
+        <div className="text-red-500 text-lg font-semibold mb-4 text-center max-w-2xl">{error}</div>
+        <div className="flex gap-4">
+          <button
+            className="px-6 py-3 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors"
+            onClick={() => setError(null)}
+          >
+            Try Again
+          </button>
+          {roadmap && (
+            <button
+              className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+              onClick={() => {
+                setError(null)
+                // Keep the existing roadmap
+              }}
+            >
+              Continue with Current Roadmap
+            </button>
+          )}
+        </div>
       </div>
     )
   }
@@ -794,7 +991,7 @@ STRICT REQUIREMENTS:
           <div className="flex flex-col items-center justify-center p-12 bg-white rounded-2xl shadow-lg">
             <Book className="text-indigo-300 mb-4" size={64} />
             <p className="text-center text-lg text-gray-600 mb-4">
-              Enterany topic above to generate a comprehensive learning roadmap.
+              Enter any topic above to generate a comprehensive learning roadmap.
             </p>
           </div>
         )}

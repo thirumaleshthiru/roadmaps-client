@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
-import { X, BookOpen, Link, Check } from 'lucide-react';
-
+import { X, Check } from 'lucide-react';
+import {formatRoadmapDisplayName } from '../utils/formatRoadmapDisplayName.js'
 function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
   const modalRef = useRef(null);
   const [isAnimating, setIsAnimating] = useState(true);
@@ -110,39 +110,42 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscapeKey);
     };
-  }, [handleClose]); // Added handleClose to dependencies
+  }, [handleClose]);
 
   if (!concept) return null;
 
   return (
     <div 
       className={`
-        fixed inset-0 bg-black bg-opacity-60 
-        flex items-center justify-center z-50 p-4
-        transition-opacity duration-300
+        fixed inset-0 bg-black/40 backdrop-blur-sm
+        flex items-center justify-center z-50 
+        px-4 py-6 sm:px-6 lg:px-8
+        transition-all duration-300 ease-out
         ${isAnimating ? 'opacity-0' : 'opacity-100'}
       `}
     >
       <div
         ref={modalRef}
         className={`
-          bg-white rounded-2xl shadow-2xl 
-          w-full max-w-4xl max-h-[90vh] overflow-hidden
-          flex flex-col transition-transform duration-300
-          ${isAnimating ? 'scale-95' : 'scale-100'}
+          bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl
+          w-full max-w-2xl lg:max-w-3xl xl:max-w-4xl 
+          max-h-[85vh] sm:max-h-[90vh]
+          flex flex-col 
+          transition-all duration-300 ease-out
+          border border-gray-100/50
+          ${isAnimating ? 'scale-95 opacity-0' : 'scale-100 opacity-100'}
         `}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 md:p-6 border-b">
-          <div className="flex items-center space-x-3">
-            <BookOpen className="text-indigo-500 hidden sm:block" size={24} />
-            <h2 className="text-xl font-bold text-gray-800 truncate pr-2">
-              {concept.concept_name}
+        <div className="flex items-start justify-between px-6 sm:px-8 pt-6 sm:pt-8 pb-4">
+          <div className="flex-1 pr-4">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-light text-gray-800 leading-tight">
+              {formatRoadmapDisplayName(concept.concept_name)}
             </h2>
           </div>
           
           <button
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-600"
+            className="flex-shrink-0 p-2 rounded-full hover:bg-gray-100/60 transition-all duration-200 text-gray-600 hover:text-gray-700"
             onClick={handleClose}
             aria-label="Close"
           >
@@ -150,50 +153,76 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
           </button>
         </div>
 
+        {/* Divider */}
+        <div className="mx-6 sm:mx-8 h-px bg-gradient-to-r from-transparent via-indigo-200/50 to-transparent"></div>
+
         {/* Content */}
-        <div className="p-4 md:p-6 overflow-y-auto flex-grow">
+        <div className="px-6 sm:px-8 py-6 overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-indigo-300 scrollbar-track-transparent">
           <div 
-            className="prose prose-indigo max-w-none text-gray-700"
+            className="prose prose-indigo max-w-none text-gray-700 leading-relaxed
+                       prose-headings:text-gray-800 prose-headings:font-medium
+                       prose-p:text-gray-700 prose-p:leading-relaxed
+                       prose-strong:text-gray-800 prose-strong:font-medium
+                       prose-em:text-gray-700
+                       prose-code:text-indigo-800 prose-code:bg-indigo-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded
+                       prose-pre:bg-indigo-50/50 prose-pre:border prose-pre:border-indigo-200
+                       prose-blockquote:border-l-indigo-300 prose-blockquote:text-gray-600
+                       prose-ul:text-gray-700 prose-ol:text-gray-700
+                       prose-li:text-gray-700
+                       text-sm sm:text-base"
             dangerouslySetInnerHTML={{ __html: concept.concept_details }}
-          ></div>
+          />
         </div>
 
-        {/* Footer with Actions and Random Quote */}
-        <div className="p-4 md:p-6 border-t bg-gray-50 flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
-          <div className="text-sm text-gray-600 italic font-medium max-w-md pl-4 border-l-4 border-indigo-300">
-            {quote}
-          </div>
-          <br />
-          <div className="flex space-x-3">
+        {/* Quote Section */}
+        {quote && (
+          <>
+            <div className="mx-6 sm:mx-8 h-px bg-gradient-to-r from-transparent via-indigo-200/50 to-transparent"></div>
+            <div className="px-6 sm:px-8 py-4">
+              <div className="text-xs sm:text-sm text-gray-600 italic font-medium leading-relaxed text-center pl-4 border-l-4 border-indigo-300">
+                "{quote}"
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Footer with Actions */}
+        <div className="px-6 sm:px-8 pb-6 sm:pb-8">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             {concept.resources && (
               <a
                 href={concept.resources}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center px-4 py-2 bg-indigo-50 text-indigo-600 rounded-md hover:bg-indigo-100 transition-colors"
+                className="flex-1 sm:flex-initial inline-flex items-center justify-center px-6 py-3 
+                         bg-indigo-50 hover:bg-indigo-100 
+                         text-indigo-600 text-sm font-medium
+                         rounded-2xl transition-all duration-200
+                         border border-indigo-200/50 hover:border-indigo-300/50"
               >
-                <Link size={16} className="mr-2" />
                 Resources
               </a>
             )}
             
             <button
-              className={`inline-flex items-center px-4 py-2 rounded-md transition-colors ${
-                marked 
-                  ? "bg-green-100 text-green-700 hover:bg-green-200" 
-                  : "bg-green-600 text-white hover:bg-green-700"
-              }`}
+              className={`flex-1 sm:flex-initial inline-flex items-center justify-center px-6 py-3
+                        text-sm font-medium rounded-2xl transition-all duration-200
+                        ${marked 
+                          ? "bg-green-50 hover:bg-green-100 text-green-700 border border-green-200/50 hover:border-green-300/50" 
+                          : "bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow-md"
+                        }`}
               onClick={handleComplete}
             >
               <Check size={16} className="mr-2" />
-              {marked ? "Completed" : "Complete"}
+              {marked ? "Completed" : "Mark Complete"}
             </button>
             
             <button
-              className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center px-6 py-3
+                       bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium
+                       rounded-2xl transition-all duration-200 shadow-sm hover:shadow-md"
               onClick={handleClose}
             >
-              <Check size={16} className="mr-2" />
               Got it
             </button>
           </div>

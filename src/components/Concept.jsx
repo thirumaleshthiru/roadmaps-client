@@ -1,6 +1,5 @@
-import React from 'react';
-import { Check} from 'lucide-react';
-
+ import { Check} from 'lucide-react';
+import {formatRoadmapDisplayName} from '../utils/formatRoadmapDisplayName.js'
 function Concept({ concept, index, onClick, marked, onMarkToggle, totalConcepts }) {
   const isEven = index % 2 === 0;
   const isLast = index === totalConcepts - 1;
@@ -18,13 +17,12 @@ function Concept({ concept, index, onClick, marked, onMarkToggle, totalConcepts 
             transform transition-all duration-300 
             hover:scale-102 hover:shadow-2xl 
             ${marked ? 'border-l-4 border-green-500' : 'border-l-4 border-transparent'} 
-            relative overflow-hidden
-shadow-[0_3px_10px_rgb(0,0,0,0.2)]          `}
+            relative overflow-hidden shadow-[0_3px_10px_rgb(0,0,0,0.2)]          `}
           onClick={onClick}
         >
           {/* Concept Title */}
           <h3 className="text-xl font-bold text-gray-800 mb-3 pr-8">
-            {concept.concept_name}
+            {formatRoadmapDisplayName(concept.concept_name)}
           </h3>
           
           {/* Progress Indicator */}

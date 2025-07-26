@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/axiosInstance';
-import { Title, Meta } from 'react-head';
-
+import { Title, Meta, Link } from 'react-head';
+import { useCurrentLocation } from '../utils/useFulFunctions';
 const Blogs = () => {
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [, currentUrl] = useCurrentLocation();
   const postsPerPage = 6;
 
     useEffect(() => {
@@ -79,8 +80,10 @@ const Blogs = () => {
 
   return (
     <>
-      <Title>Blogs</Title>
-      <Meta name="description" content="Read our latest blogs and know the latest trends in software and technology" />
+      <Title>EasyRoadmaps - Blog</Title>
+      <Meta name="description" content="our latest articles on technology, motivation, and career development. Stay updated with the newest trends in software and the tech industry." />
+       <Link rel='canonical' href={currentUrl} />
+
       <div className="min-h-screen">
         <header className="bg-white">
           <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">

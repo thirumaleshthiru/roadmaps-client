@@ -37,9 +37,87 @@ const Resources = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+  const [originalUrl, setOriginalUrl] = useState("");
+  const [pageTitle, setPageTitle] = useState("Learning Resources | Education Hub");
   const modalRef = useRef(null);
   const filterModalRef = useRef(null);
   const [, currentUrl] = useCurrentLocation();
+
+  // Store original URL on component mount
+  useEffect(() => {
+    setOriginalUrl(window.location.href);
+  }, []);
+
+  // Function to create SEO-friendly slug from resource name
+  const createSlug = (text) => {
+    return text
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+  };
+
+  // Function to truncate description for meta tag
+  const truncateDescription = (text, maxLength = 160) => {
+    if (!text) return "Explore this learning resource to enhance your knowledge.";
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength - 3) + "...";
+  };
+
+  // Update URL and browser history when resource modal opens/closes
+  const updateUrl = useCallback((resource) => {
+    if (resource) {
+      const slug = createSlug(resource.resource_name);
+      const newUrl = `${originalUrl}/${slug}`;
+      const newTitle = `${resource.resource_name}`;
+      
+      // Update the page title state
+      setPageTitle(newTitle);
+      
+      // Also update document.title directly for immediate effect
+      document.title = newTitle;
+      
+      window.history.pushState(
+        { resourceId: resource.resource_id, resourceName: resource.resource_name }, 
+        newTitle, 
+        newUrl
+      );
+    } else {
+      const defaultTitle = "Learning Resources | Education Hub";
+      setPageTitle(defaultTitle);
+      document.title = defaultTitle;
+      
+      window.history.pushState(
+        null, 
+        defaultTitle, 
+        originalUrl
+      );
+    }
+  }, [originalUrl]);
+
+  // Handle browser back/forward navigation
+  useEffect(() => {
+    const handlePopState = (event) => {
+      if (event.state && event.state.resourceId) {
+        // Find and open the resource based on the state
+        const resource = resources.find(r => r.resource_id === event.state.resourceId);
+        if (resource) {
+          setSelectedResource(resource);
+          const newTitle = `${resource.resource_name} | Learning Resources`;
+          setPageTitle(newTitle);
+          document.title = newTitle;
+        }
+      } else {
+        // Close modal when navigating back to main page
+        setSelectedResource(null);
+        const defaultTitle = "Learning Resources | Education Hub";
+        setPageTitle(defaultTitle);
+        document.title = defaultTitle;
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [resources]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -48,9 +126,9 @@ const Resources = () => {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-    useEffect(() => {
-      window.scrollTo(0, 0);
-    }, []);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -140,6 +218,7 @@ const Resources = () => {
 
   const handleOpenModal = (resource) => {
     setSelectedResource(resource);
+    updateUrl(resource);
     handleIncrementViews(resource.resource_name);
     setResources((prevResources) =>
       prevResources.map((res) =>
@@ -148,6 +227,11 @@ const Resources = () => {
           : res
       )
     );
+  };
+
+  const handleCloseModal = () => {
+    setSelectedResource(null);
+    updateUrl(null);
   };
 
   const filterResources = useCallback((data, query, type) => {
@@ -193,6 +277,46 @@ const Resources = () => {
     setShowFilterModal(false);
   }, []);
 
+  // Generate dynamic meta tags based on selected resource
+  const generateMetaTags = () => {
+    if (selectedResource) {
+      const resourceType = selectedResource.resource_type === 'youtube' ? 'video' : selectedResource.resource_type;
+      const currentResourceUrl = `${originalUrl}/${createSlug(selectedResource.resource_name)}`;
+      
+      return (
+        <>
+          <Title>{pageTitle}</Title>
+          <Meta name="description" content={truncateDescription(selectedResource.resource_description)} />
+          <Meta rel="canonical" href={currentResourceUrl} />
+          <Meta property="og:title" content={pageTitle} />
+          <Meta property="og:description" content={truncateDescription(selectedResource.resource_description)} />
+          <Meta property="og:url" content={currentResourceUrl} />
+          <Meta property="og:type" content="article" />
+          <Meta name="twitter:card" content="summary_large_image" />
+          <Meta name="twitter:title" content={pageTitle} />
+          <Meta name="twitter:description" content={truncateDescription(selectedResource.resource_description)} />
+          <Meta name="keywords" content={`learning, education, ${resourceType}, ${selectedResource.resource_name.toLowerCase()}`} />
+        </>
+      );
+    }
+
+    return (
+      <>
+        <Title>{pageTitle}</Title>
+        <Meta name="description" content="Explore high-quality learning resources and structured guides designed to help you learn faster, grow confidently, and reach expert-level knowledge across a wide range of technologies and career paths." />
+        <Meta rel="canonical" href={currentUrl} />
+        <Meta property="og:title" content={pageTitle} />
+        <Meta property="og:description" content="Explore high-quality learning resources and structured guides designed to help you learn faster, grow confidently, and reach expert-level knowledge across a wide range of technologies and career paths." />
+        <Meta property="og:url" content={currentUrl} />
+        <Meta property="og:type" content="website" />
+        <Meta name="twitter:card" content="summary_large_image" />
+        <Meta name="twitter:title" content={pageTitle} />
+        <Meta name="twitter:description" content="Explore high-quality learning resources and structured guides designed to help you learn faster, grow confidently, and reach expert-level knowledge across a wide range of technologies and career paths." />
+        <Meta name="keywords" content="learning resources, education, online courses, tutorials, articles, videos, career development" />
+      </>
+    );
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -212,10 +336,7 @@ const Resources = () => {
 
   return (
     <>
-      
-<Title>Learning Resources | Education Hub</Title>
-<Meta name="description" content="Access curated learning resources to accelerate your journey to mastery" />
-<Meta rel="canonical" href={currentUrl} />
+      {generateMetaTags()}
 
       <div className="min-h-screen">
         <div className="max-w-7xl mx-auto px-4 py-16 md:px-8 space-y-12">
@@ -244,7 +365,6 @@ const Resources = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   aria-label="Search resources"
                 />
-                 
               </div>
             </div>
 
@@ -488,7 +608,7 @@ const Resources = () => {
                 </h2>
               </div>
               <button
-                onClick={() => setSelectedResource(null)}
+                onClick={handleCloseModal}
                 className="p-2 hover:bg-gray-100 rounded-xl transition-colors duration-200"
                 aria-label="Close modal"
               >
@@ -516,7 +636,7 @@ const Resources = () => {
 
               <div className="sticky bottom-0 bg-white border-t border-gray-200 pt-6 flex justify-end">
                 <button
-                  onClick={() => setSelectedResource(null)}
+                  onClick={handleCloseModal}
                   className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 font-medium text-lg shadow-lg hover:shadow-xl"
                 >
                   Close

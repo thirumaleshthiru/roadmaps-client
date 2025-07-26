@@ -43,6 +43,7 @@ return (
 <Route  path='/resources' element={<Resources/>}/>
 <Route  path='/post/:postname/:blog_id' element={<Post/>}/>
 <Route path='/editblog/:id' element={<EditBlog />}/>
+<Route path="/roadmaps/:roadmapname/concept/:conceptname" element={<Roadmap />} />
 
 <Route path='/ai-generated-roadmaps' element={<AIGenerated />}/>
 <Route path='/checklist' element={<Checklist/>}/>

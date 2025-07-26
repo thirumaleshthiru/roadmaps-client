@@ -10,9 +10,7 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">About Us</h3>
             <p className="text-sm text-gray-400">
-              Expert Roadmaps provides expertly curated learning paths to help you master
-              programming, data science, and design.
-            </p>
+EasyRoadmaps offers expert-made learning paths to help you master programming, data science, web development, design, and more            </p>
           </div>
           
           {/* Quick Links */}

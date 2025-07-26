@@ -74,7 +74,7 @@ function PopularRoadmaps() {
 
   return (
     <>
-      <Title>Popular Roadmaps | Learning Hub</Title>
+      <Title>Popular Roadmaps | Easy Roadmaps</Title>
       <Meta name="description" content="Explore our most popular learning roadmaps curated by experts for Java, Python, UI/UX, Figma, and more." />
       <Meta rel="canonical" href={currentUrl} />
       <div className="min-h-screen">

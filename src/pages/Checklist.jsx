@@ -2,7 +2,8 @@
 import { useState, useEffect } from "react"
 import { Plus, CheckCircle2, Square, Trash2, X, ChevronDown, ChevronRight, BarChart3 } from "lucide-react"
 import { GoogleGenerativeAI } from "@google/generative-ai"
-
+import {Title, Meta, Link} from 'react-head'
+import { useCurrentLocation } from "../utils/useFulFunctions"
 // Initialize Google Generative AI
 const genAI = new GoogleGenerativeAI("AIzaSyBmU-6zbaAKVpc8biv_NnA6opYJ5AER5HA")
 
@@ -21,6 +22,7 @@ const ResponsiveChecklist = () => {
   })
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState(null)
+  const [,currentUrl] = useCurrentLocation()
 
   // Load data from localStorage on component mount
   useEffect(() => {
@@ -380,6 +382,11 @@ Return ONLY the JSON object with no explanation, disclaimer, or extra formatting
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      <Title>Smart Checklist - Create AI & Custom Checklists for Anything</Title>
+
+      <Meta name="description" content="Create organized checklists for anything - use AI generation or create custom checklists manually. Track progress with analytics and stay organized." />
+
+      <Link rel="canonical" href={currentUrl} />
       {/* Error Display */}
       {error && (
         <div className="fixed top-4 right-4 z-50 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg shadow-lg">

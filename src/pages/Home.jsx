@@ -15,9 +15,21 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import HeroBanner from "../assets/hero-banner.webp";
+import { Title, Meta  } from "react-head";
+import { useCurrentLocation } from "../utils/useFulFunctions";
+
  const Home = () => {
+  const[ ,currentUrl]= useCurrentLocation()
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900 font-sans">
+      <Title>EasyRoadmaps - Learn Anything With Expert Roadmaps</Title>
+       <Meta
+      name="description"
+      content="Learn new skills easily and effortlessly by following EasyRoadmaps's expert roadmaps. From programming to design and more, we provide the guidance you need to master your skills.      "
+    />
+    <link rel="canonical" href={currentUrl}  />
+ 
+
       {/* Header Hero */}
       <section className="relative pt-24 pb-32 overflow-hidden">
         {/* Background Elements */}

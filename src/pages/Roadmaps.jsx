@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/axiosInstance.js';
 import { Map, Search,   AlertCircle, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCurrentLocation } from '../utils/useFulFunctions.js';
-import { Title, Meta } from 'react-head';
-
-const ITEMS_PER_PAGE = 6;
+import { Title, Meta, Link } from 'react-head';
+import { formatRoadmapDisplayName } from '../utils/formatRoadmapDisplayName.js';
+ const ITEMS_PER_PAGE = 6;
 const DEBOUNCE_DELAY = 300;
 
 const SkeletonLoader = () => (
@@ -145,9 +145,9 @@ function Roadmaps() {
 
   return (
     <>
-      <Title>Learning Roadmaps | Education Hub</Title>
-      <Meta name="description" content="Explore structured learning paths to guide your journey from beginner to expert in various skills and technologies." />
-      <Meta rel="canonical" href={currentUrl} />
+      <Title>Learning Roadmaps: Java, Web Development, Data Analytics, and More</Title>
+      <Meta name="description" content="Explore step-by-step learning roadmaps designed to take you from beginner to expert in skills like Java, Web Development, Data Analytics, and more." />
+      <Link rel="canonical" href={currentUrl} />
       <div className="min-h-screen">
         <div className="max-w-7xl mx-auto px-4 py-16 md:px-8 space-y-12">
           {/* Hero Section */}
@@ -219,7 +219,7 @@ function Roadmaps() {
                       <span className="px-4 py-2 text-sm font-semibold rounded-full bg-indigo-500/10 text-indigo-600">Roadmap</span>
                       <Map className="text-indigo-500" size={28} aria-hidden="true" />
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-4 capitalize">{roadmap.roadmap_name}</h3>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4 capitalize">{formatRoadmapDisplayName(roadmap.roadmap_name).toUpperCase()}</h3>
                     <p className="text-gray-600 mb-8 leading-relaxed line-clamp-3">{roadmap.roadmap_description || "Start your learning journey with this structured roadmap."}</p>
                     <button
                       className="w-full px-6 py-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 font-medium flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"

@@ -1,5 +1,4 @@
 "use client"
-
 import { useEffect, useState, useRef, useMemo, useCallback } from "react"
 import { Title, Meta } from "react-head" // Re-added react-head
 import { useCurrentLocation } from "../utils/useFulFunctions.js" // Re-added useCurrentLocation
@@ -10,7 +9,6 @@ import { Link } from "react-router-dom" // Re-added Link from react-router-dom
 function Concept({ concept, index, onClick, marked, onMarkToggle, totalConcepts }) {
   const isEven = index % 2 === 0
   const isLast = index === totalConcepts - 1
-
   return (
     <div
       className={`flex flex-col ${isEven ? "md:flex-row" : "md:flex-row-reverse"} items-center mb-16 relative`}
@@ -31,20 +29,17 @@ function Concept({ concept, index, onClick, marked, onMarkToggle, totalConcepts 
         >
           {/* Concept Title */}
           <h3 className="text-xl font-bold text-gray-800 mb-3 pr-8">{concept.concept_name}</h3>
-
           {/* Progress Indicator */}
           {marked && (
             <div className="absolute top-0 right-0 bg-green-500 text-white p-2 rounded-bl-lg">
               <Check size={16} />
             </div>
           )}
-
           {/* Concept Description */}
           <p className="text-gray-600 text-sm md:text-base">
             {concept.concept_description?.substring(0, 120)}
             {concept.concept_description?.length > 120 ? "..." : ""}
           </p>
-
           {/* Card Footer */}
           <div className="mt-4 flex items-center justify-between text-sm">
             <span className="text-indigo-600 font-medium flex items-center">Learn more</span>
@@ -52,7 +47,6 @@ function Concept({ concept, index, onClick, marked, onMarkToggle, totalConcepts 
           </div>
         </div>
       </div>
-
       {/* Center Timeline Marker */}
       <div className="w-full md:w-2/12 flex justify-center relative">
         <button
@@ -72,7 +66,6 @@ function Concept({ concept, index, onClick, marked, onMarkToggle, totalConcepts 
             <span className="font-bold text-indigo-500">{index + 1}</span>
           )}
         </button>
-
         {/* Timeline Connector */}
         {!isLast && (
           <div
@@ -81,7 +74,6 @@ function Concept({ concept, index, onClick, marked, onMarkToggle, totalConcepts 
           ></div>
         )}
       </div>
-
       {/* Empty Space for Layout */}
       <div className="w-full md:w-5/12"></div>
     </div>
@@ -92,7 +84,6 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
   const modalRef = useRef(null)
   const [isAnimating, setIsAnimating] = useState(true)
   const [quote, setQuote] = useState("")
-
   // Collection of motivational quotes - wrapped in useMemo to prevent recreation on each render
   const motivationalQuotes = useMemo(
     () => [
@@ -143,7 +134,6 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
   // Function to format text with markdown-like syntax
   const formatText = useCallback((text) => {
     if (!text) return ""
-
     // Convert markdown to HTML
     const formattedText = text
       // Handle code blocks first (to avoid conflicts with bold formatting)
@@ -157,20 +147,16 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
       .replace(/\*([^*]+)\*/g, '<strong class="font-semibold text-gray-800">$1</strong>')
       // Handle line breaks
       .replace(/\n/g, "<br>")
-
     return formattedText
   }, [])
 
   // Function to format plain text content with basic styling and markdown
   const formatContent = (content) => {
     if (!content) return ""
-
     // Split content into sections
     const sections = content.split("\n\n").filter((s) => s.trim())
-
     return sections.map((section, index) => {
       const trimmed = section.trim()
-
       // Check if it's "Brief Summary:" section
       if (trimmed.startsWith("Brief Summary:")) {
         const summaryText = trimmed.replace("Brief Summary:", "").trim()
@@ -184,7 +170,6 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
           </div>
         )
       }
-
       // Check if it's "Key Concepts:" section
       if (trimmed.startsWith("Key Concepts:")) {
         const conceptsText = trimmed.replace("Key Concepts:", "").trim()
@@ -192,7 +177,6 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
           .split("\n")
           .filter((c) => c.trim())
           .map((c) => c.replace(/^[-•*]\s*/, ""))
-
         return (
           <div key={index} className="mb-8">
             <h3 className="text-lg font-medium text-gray-800 mb-4">Key Concepts</h3>
@@ -210,7 +194,6 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
           </div>
         )
       }
-
       // Check if it's "Examples:" section
       if (trimmed.startsWith("Examples:")) {
         const examplesText = trimmed.replace("Examples:", "").trim()
@@ -218,7 +201,6 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
           .split("\n")
           .filter((e) => e.trim())
           .map((e) => e.replace(/^[-•*]\s*/, ""))
-
         return (
           <div key={index} className="mb-8">
             <h3 className="text-lg font-medium text-gray-800 mb-4">Examples</h3>
@@ -238,7 +220,6 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
           </div>
         )
       }
-
       // Regular paragraph with markdown formatting
       return (
         <div
@@ -293,18 +274,15 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
         handleClose()
       }
     }
-
     // Close with escape key
     const handleEscapeKey = (event) => {
       if (event.key === "Escape") {
         handleClose()
       }
     }
-
     // Add event listeners
     document.addEventListener("mousedown", handleClickOutside)
     document.addEventListener("keydown", handleEscapeKey)
-
     // Cleanup
     return () => {
       document.removeEventListener("mousedown", handleClickOutside)
@@ -351,15 +329,12 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
             <X size={20} />
           </button>
         </div>
-
         {/* Divider */}
         <div className="mx-6 sm:mx-8 h-px bg-gradient-to-r from-transparent via-indigo-200/50 to-transparent"></div>
-
         {/* Content */}
         <div className="px-6 sm:px-8 py-6 overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-indigo-300 scrollbar-track-transparent">
           <div className="prose prose-indigo max-w-none">{formatContent(concept.concept_details)}</div>
         </div>
-
         {/* Quote Section */}
         {quote && (
           <>
@@ -371,7 +346,6 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
             </div>
           </>
         )}
-
         {/* Footer with Actions */}
         <div className="px-6 sm:px-8 pb-6 sm:pb-8">
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -381,22 +355,22 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 sm:flex-initial inline-flex items-center justify-center px-6 py-3
-                          bg-indigo-50 hover:bg-indigo-100
-                          text-indigo-600 text-sm font-medium
-                         rounded-2xl transition-all duration-200
-                         border border-indigo-200/50 hover:border-indigo-300/50"
+                           bg-indigo-50 hover:bg-indigo-100
+                           text-indigo-600 text-sm font-medium
+                           rounded-2xl transition-all duration-200
+                           border border-indigo-200/50 hover:border-indigo-300/50"
               >
                 Resources
               </a>
             )}
             <button
               className={`flex-1 sm:flex-initial inline-flex items-center justify-center px-6 py-3
-                        text-sm font-medium rounded-2xl transition-all duration-200
-                        ${
-                          marked
-                            ? "bg-green-50 hover:bg-green-100 text-green-700 border border-green-200/50 hover:border-green-300/50"
-                            : "bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow-md"
-                        }`}
+                         text-sm font-medium rounded-2xl transition-all duration-200
+                         ${
+                           marked
+                             ? "bg-green-50 hover:bg-green-100 text-green-700 border border-green-200/50 hover:border-green-300/50"
+                             : "bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow-md"
+                         }`}
               onClick={handleComplete}
             >
               <Check size={16} className="mr-2" />
@@ -404,8 +378,8 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
             </button>
             <button
               className="flex-1 sm:flex-initial inline-flex items-center justify-center px-6 py-3
-                       bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium
-                       rounded-2xl transition-all duration-200 shadow-sm hover:shadow-md"
+                         bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium
+                         rounded-2xl transition-all duration-200 shadow-sm hover:shadow-md"
               onClick={handleClose}
             >
               Got it
@@ -456,24 +430,20 @@ function AIGenerated() {
   // Enhanced JSON sanitization and parsing function
   const parseAIResponse = (responseText) => {
     console.log("Raw AI response length:", responseText.length)
-
     // Step 1: Clean the response text
- const cleanedText = responseText
-  .replace(/```json|```/g, "") // Remove code block markers
-  .replace(/^\uFEFF/, "") // Remove BOM
-  .replace(/[\x00-\x1F\x7F-\x9F]/g, "") // Remove control characters
-  .trim();
-
+    const cleanedText = responseText
+      .replace(/```json|```/g, "") // Remove code block markers
+      .replace(/^\uFEFF/, "") // Remove BOM
+      .replace(/[\x00-\x1F\x7F-\x9F]/g, "") // Remove control characters - FIX APPLIED HERE
+      .trim()
     console.log("Cleaned text length:", cleanedText.length)
 
     // Step 2: Find JSON boundaries
     const firstBrace = cleanedText.indexOf("{")
     const lastBrace = cleanedText.lastIndexOf("}")
-
     if (firstBrace === -1 || lastBrace === -1 || firstBrace >= lastBrace) {
       throw new Error("No valid JSON structure found in response")
     }
-
     const jsonContent = cleanedText.substring(firstBrace, lastBrace + 1)
     console.log("Extracted JSON length:", jsonContent.length)
 
@@ -485,7 +455,6 @@ function AIGenerated() {
           .replace(/,(\s*[}\]])/g, "$1") // Remove trailing commas
           .replace(/([{,]\s*)(\w+):/g, '$1"$2":') // Quote unquoted keys
           .replace(/:\s*'([^']*)'/g, ': "$1"'), // Replace single quotes
-
       // Strategy 2: Fix string values with newlines
       (text) => {
         const lines = text.split("\n")
@@ -495,13 +464,11 @@ function AIGenerated() {
               const colonIndex = line.indexOf(":")
               const beforeColon = line.substring(0, colonIndex + 1)
               const afterColon = line.substring(colonIndex + 1).trim()
-
               if (afterColon.startsWith('"')) {
                 // Find proper string boundaries and escape content
                 let inString = false
                 let escaped = false
                 let result = beforeColon + ' "'
-
                 for (let i = 1; i < afterColon.length; i++) {
                   const char = afterColon[i]
                   if (!inString && char === '"') {
@@ -536,7 +503,6 @@ function AIGenerated() {
           })
           .join("\n")
       },
-
       // Strategy 3: Handle malformed arrays and objects
       (text) => {
         // Fix missing commas between array elements
@@ -552,7 +518,6 @@ function AIGenerated() {
       try {
         const cleanedJson = cleaningStrategies[i](jsonContent)
         const parsed = JSON.parse(cleanedJson)
-
         // Validate the structure
         if (parsed && typeof parsed === "object" && parsed.roadmap_id && Array.isArray(parsed.concepts)) {
           console.log(`Successfully parsed with strategy ${i + 1}`)
@@ -567,7 +532,6 @@ function AIGenerated() {
     // Step 5: Last resort - try to extract and reconstruct JSON manually
     try {
       console.log("Attempting manual JSON reconstruction...")
-
       // Extract key components using regex
       const roadmapIdMatch = cleanedText.match(/"roadmap_id":\s*(\d+)/)
       const roadmapNameMatch = cleanedText.match(/"roadmap_name":\s*"([^"]*)"/)
@@ -596,7 +560,6 @@ function AIGenerated() {
 
       // Try to extract individual concepts
       const conceptMatches = [...conceptsMatch[1].matchAll(/{[^}]*"concept_id":\s*(\d+)[^}]*}/g)]
-
       conceptMatches.forEach((match, index) => {
         try {
           const conceptText = match[0]
@@ -631,14 +594,12 @@ function AIGenerated() {
 
   useEffect(() => {
     window.scrollTo(0, 0)
-
     // Try to load the last generated roadmap
     try {
       const lastRoadmap = localStorage.getItem("lastGeneratedRoadmap")
       if (lastRoadmap) {
         const parsedRoadmap = JSON.parse(lastRoadmap)
         setRoadmap(parsedRoadmap)
-
         // Load marked concepts for this roadmap
         if (parsedRoadmap && parsedRoadmap.roadmap_id) {
           const conceptsForRoadmap = loadMarkedConcepts(parsedRoadmap.roadmap_id)
@@ -654,21 +615,17 @@ function AIGenerated() {
     setIsLoading(true)
     setError(null)
     setGenerationProgress(10)
-
     try {
       const model = genAI.getGenerativeModel({
         model: "gemini-2.5-flash",
       })
-
       setGenerationProgress(20)
 
       // Generate a unique roadmap ID
       const roadmapId = Date.now()
-
       const prompt = `Create a comprehensive learning roadmap for the topic: **${topic}**
 
 Format your response as a JSON object using EXACTLY the following structure:
-
 {
   "roadmap_id": ${roadmapId},
   "roadmap_name": "${topic}",
@@ -694,9 +651,9 @@ STRICT REQUIREMENTS:
 2. Generate 20-25 concepts that cover the COMPLETE learning journey from beginner to advanced.
 3. Each concept must build logically on previous concepts.
 4. For concept_details, use ONLY this exact format:
-   - Summary: (300-500 words) - must be clear and comprehensive.
-   - Key Concepts: bullet points of essential ideas.
-   - Examples: 5-7 practical real-world examples or use cases.
+    - Summary: (300-500 words) - must be clear and comprehensive.
+    - Key Concepts: bullet points of essential ideas.
+    - Examples: 5-7 practical real-world examples or use cases.
 5. Start from complete beginner concepts with no prior knowledge assumed.
 6. Final concepts should cover advanced professional-level topics.
 7. Use double newlines between each concept block.
@@ -704,14 +661,11 @@ STRICT REQUIREMENTS:
 9. Make each concept concise, structured, and informative.
 10. Return ONLY the JSON object. Do NOT include any explanation, disclaimer, or extra text.
 11. If a hands-on project is genuinely needed for mastering the topic, include it as the final concept using the same structure as other concepts. Do not include a project if it doesn't add practical value.
-
 Make sure the JSON is valid and all strings are properly escaped.`
 
       setGenerationProgress(30)
-
       const result = await model.generateContent(prompt)
       setGenerationProgress(70)
-
       const responseText = await result.response.text()
       setGenerationProgress(80)
 
@@ -723,24 +677,20 @@ Make sure the JSON is valid and all strings are properly escaped.`
         if (!roadmapData.roadmap_id || !roadmapData.concepts || !Array.isArray(roadmapData.concepts)) {
           throw new Error("Invalid roadmap structure after parsing")
         }
-
         if (roadmapData.concepts.length === 0) {
           throw new Error("No concepts found in roadmap")
         }
 
         // Save to localStorage as the last generated roadmap
         localStorage.setItem("lastGeneratedRoadmap", JSON.stringify(roadmapData))
-
         // Reset marked concepts for this new roadmap
         setMarkedConcepts([])
         setRoadmap(roadmapData)
         setGenerationProgress(100)
         setError(null)
-
         console.log(`Successfully generated roadmap with ${roadmapData.concepts.length} concepts`)
       } catch (parseError) {
         console.error("Enhanced parsing failed:", parseError)
-
         // Create a basic fallback roadmap
         const fallbackRoadmap = {
           roadmap_id: roadmapId,
@@ -759,7 +709,6 @@ Make sure the JSON is valid and all strings are properly escaped.`
             },
           ],
         }
-
         localStorage.setItem("lastGeneratedRoadmap", JSON.stringify(fallbackRoadmap))
         setMarkedConcepts([])
         setRoadmap(fallbackRoadmap)
@@ -781,7 +730,6 @@ Make sure the JSON is valid and all strings are properly escaped.`
   const handleGenerateRoadmap = async (e) => {
     e.preventDefault()
     if (!promptInput.trim()) return
-
     setIsGenerating(true)
     await generateRoadmap(promptInput.trim())
     setIsGenerating(false)
@@ -798,16 +746,13 @@ Make sure the JSON is valid and all strings are properly escaped.`
 
   const toggleConceptMark = (conceptId) => {
     if (!roadmap || !roadmap.roadmap_id) return
-
     let updatedMarkedConcepts
     if (markedConcepts.includes(conceptId)) {
       updatedMarkedConcepts = markedConcepts.filter((id) => id !== conceptId)
     } else {
       updatedMarkedConcepts = [...markedConcepts, conceptId]
     }
-
     setMarkedConcepts(updatedMarkedConcepts)
-
     // Save marked concepts for this specific roadmap
     saveMarkedConcepts(roadmap.roadmap_id, updatedMarkedConcepts)
   }
@@ -876,14 +821,13 @@ Make sure the JSON is valid and all strings are properly escaped.`
   return (
     <>
       <Title>{roadmap ? `Expert ${roadmap.roadmap_name} Learning Roadmap` : "AI-Generated Learning Roadmaps"}</Title>
-      <Meta  
+      <Meta
         name="description"
         content={
           roadmap ? roadmap.roadmap_description : "Generate comprehensive learning roadmaps for any topic using AI"
         }
       />
-   
-      <Meta rel="canonical" href={currentUrl} />  
+      <Meta rel="canonical" href={currentUrl} />
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl shadow-xl p-8 mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">

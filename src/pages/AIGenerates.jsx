@@ -458,11 +458,11 @@ function AIGenerated() {
     console.log("Raw AI response length:", responseText.length)
 
     // Step 1: Clean the response text
-    const cleanedText = responseText
-      .replace(/```json|```/g, "") // Remove code block markers
-      .replace(/^\uFEFF/, "") // Remove BOM
-      .replace(/[\u0000-\u001F\u007F-\u009F]/g, "") // Remove control characters
-      .trim()
+ const cleanedText = responseText
+  .replace(/```json|```/g, "") // Remove code block markers
+  .replace(/^\uFEFF/, "") // Remove BOM
+  .replace(/[\x00-\x1F\x7F-\x9F]/g, "") // Remove control characters
+  .trim();
 
     console.log("Cleaned text length:", cleanedText.length)
 
@@ -876,14 +876,14 @@ Make sure the JSON is valid and all strings are properly escaped.`
   return (
     <>
       <Title>{roadmap ? `Expert ${roadmap.roadmap_name} Learning Roadmap` : "AI-Generated Learning Roadmaps"}</Title>
-      <Meta // Re-added Meta
+      <Meta  
         name="description"
         content={
           roadmap ? roadmap.roadmap_description : "Generate comprehensive learning roadmaps for any topic using AI"
         }
       />
-      {/* Assuming currentUrl is used for canonical link, if not, remove this line */}
-      {/* <Meta rel="canonical" href={currentUrl} /> */}
+   
+      <Meta rel="canonical" href={currentUrl} />  
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl shadow-xl p-8 mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">

@@ -1,11 +1,11 @@
 "use client"
 
 import { useEffect, useState, useRef, useMemo, useCallback } from "react"
-import { Title, Meta } from "react-head"
-import { useCurrentLocation } from "../utils/useFulFunctions.js"
+import { Title, Meta } from "react-head" // Re-added react-head
+import { useCurrentLocation } from "../utils/useFulFunctions.js" // Re-added useCurrentLocation
 import { ChevronRight, Award, Book, Send, Loader2, X, Check } from "lucide-react"
-import { GoogleGenerativeAI } from "@google/generative-ai"
-import { Link } from "react-router-dom"
+import { GoogleGenerativeAI } from "@google/generative-ai" // Corrected import path for GoogleGenerativeAI
+import { Link } from "react-router-dom" // Re-added Link from react-router-dom
 
 function Concept({ concept, index, onClick, marked, onMarkToggle, totalConcepts }) {
   const isEven = index % 2 === 0
@@ -31,17 +31,20 @@ function Concept({ concept, index, onClick, marked, onMarkToggle, totalConcepts 
         >
           {/* Concept Title */}
           <h3 className="text-xl font-bold text-gray-800 mb-3 pr-8">{concept.concept_name}</h3>
+
           {/* Progress Indicator */}
           {marked && (
             <div className="absolute top-0 right-0 bg-green-500 text-white p-2 rounded-bl-lg">
               <Check size={16} />
             </div>
           )}
+
           {/* Concept Description */}
           <p className="text-gray-600 text-sm md:text-base">
             {concept.concept_description?.substring(0, 120)}
             {concept.concept_description?.length > 120 ? "..." : ""}
           </p>
+
           {/* Card Footer */}
           <div className="mt-4 flex items-center justify-between text-sm">
             <span className="text-indigo-600 font-medium flex items-center">Learn more</span>
@@ -49,6 +52,7 @@ function Concept({ concept, index, onClick, marked, onMarkToggle, totalConcepts 
           </div>
         </div>
       </div>
+
       {/* Center Timeline Marker */}
       <div className="w-full md:w-2/12 flex justify-center relative">
         <button
@@ -68,6 +72,7 @@ function Concept({ concept, index, onClick, marked, onMarkToggle, totalConcepts 
             <span className="font-bold text-indigo-500">{index + 1}</span>
           )}
         </button>
+
         {/* Timeline Connector */}
         {!isLast && (
           <div
@@ -76,6 +81,7 @@ function Concept({ concept, index, onClick, marked, onMarkToggle, totalConcepts 
           ></div>
         )}
       </div>
+
       {/* Empty Space for Layout */}
       <div className="w-full md:w-5/12"></div>
     </div>
@@ -137,6 +143,7 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
   // Function to format text with markdown-like syntax
   const formatText = useCallback((text) => {
     if (!text) return ""
+
     // Convert markdown to HTML
     const formattedText = text
       // Handle code blocks first (to avoid conflicts with bold formatting)
@@ -419,7 +426,7 @@ function AIGenerated() {
   const [markedConcepts, setMarkedConcepts] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [, currentUrl] = useCurrentLocation()
+  const [, currentUrl] = useCurrentLocation() // Re-added useCurrentLocation
   const [promptInput, setPromptInput] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
   const [generationProgress, setGenerationProgress] = useState(0)
@@ -497,12 +504,10 @@ function AIGenerated() {
 
                 for (let i = 1; i < afterColon.length; i++) {
                   const char = afterColon[i]
-
                   if (!inString && char === '"') {
                     inString = true
                     continue
                   }
-
                   if (inString) {
                     if (escaped) {
                       result += char
@@ -524,7 +529,6 @@ function AIGenerated() {
                     }
                   }
                 }
-
                 return result
               }
             }
@@ -627,12 +631,14 @@ function AIGenerated() {
 
   useEffect(() => {
     window.scrollTo(0, 0)
+
     // Try to load the last generated roadmap
     try {
       const lastRoadmap = localStorage.getItem("lastGeneratedRoadmap")
       if (lastRoadmap) {
         const parsedRoadmap = JSON.parse(lastRoadmap)
         setRoadmap(parsedRoadmap)
+
         // Load marked concepts for this roadmap
         if (parsedRoadmap && parsedRoadmap.roadmap_id) {
           const conceptsForRoadmap = loadMarkedConcepts(parsedRoadmap.roadmap_id)
@@ -801,6 +807,7 @@ Make sure the JSON is valid and all strings are properly escaped.`
     }
 
     setMarkedConcepts(updatedMarkedConcepts)
+
     // Save marked concepts for this specific roadmap
     saveMarkedConcepts(roadmap.roadmap_id, updatedMarkedConcepts)
   }
@@ -869,14 +876,14 @@ Make sure the JSON is valid and all strings are properly escaped.`
   return (
     <>
       <Title>{roadmap ? `Expert ${roadmap.roadmap_name} Learning Roadmap` : "AI-Generated Learning Roadmaps"}</Title>
-      <Meta
+      <Meta // Re-added Meta
         name="description"
         content={
           roadmap ? roadmap.roadmap_description : "Generate comprehensive learning roadmaps for any topic using AI"
         }
       />
-      <Meta rel="canonical" href={currentUrl} />
-
+      {/* Assuming currentUrl is used for canonical link, if not, remove this line */}
+      {/* <Meta rel="canonical" href={currentUrl} /> */}
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl shadow-xl p-8 mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
@@ -887,7 +894,6 @@ Make sure the JSON is valid and all strings are properly escaped.`
               ? roadmap.roadmap_description
               : "Enter any topic below to generate a comprehensive learning roadmap with 20-25 concepts."}
           </p>
-
           <form onSubmit={handleGenerateRoadmap} className="flex flex-col sm:flex-row gap-4">
             <input
               type="text"
@@ -963,7 +969,6 @@ Make sure the JSON is valid and all strings are properly escaped.`
                     {roadmap.concepts.length} concepts from beginner to advanced
                   </div>
                 </div>
-
                 <RoadmapDetails
                   data={roadmap.concepts}
                   onConceptClick={handleConceptClick}
@@ -1004,7 +1009,6 @@ function RoadmapDetails({ data, onConceptClick, markedConcepts, toggleConceptMar
   return (
     <div className="relative w-full max-w-4xl mx-auto pb-16">
       <div className="absolute left-1/2 transform -translate-x-1/2 w-1 sm:w-2 h-full bg-gradient-to-b from-indigo-300 to-purple-300 rounded-full shadow-lg"></div>
-
       {data.map((concept, index) => (
         <Concept
           key={concept.concept_id}

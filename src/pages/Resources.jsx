@@ -1,12 +1,14 @@
-import { useState, useEffect, useCallback, Suspense, useRef } from "react";
-import { Search, X, AlertCircle, ArrowRight, ChevronLeft, ChevronRight, Eye, Filter } from "lucide-react";
-import { Title, Meta } from "react-head";
-import axiosInstance from "../utils/axiosInstance";
-import { useCurrentLocation } from "../utils/useFulFunctions";
+"use client"
 
-const resourceTypes = ["all", "article", "video", "website", "course", "pdf"];
-const ITEMS_PER_PAGE = 6;
-const DEBOUNCE_DELAY = 300;
+import { useState, useEffect, useCallback, Suspense, useRef } from "react"
+import { Search, X, AlertCircle, ArrowRight, ChevronLeft, ChevronRight, Eye, Filter } from "lucide-react"
+import { Title, Meta } from "react-head"
+import axiosInstance from "../utils/axiosInstance"
+import { useCurrentLocation } from "../utils/useFulFunctions"
+
+const resourceTypes = ["all", "article", "video", "website", "course", "pdf"]
+const ITEMS_PER_PAGE = 6
+const DEBOUNCE_DELAY = 300
 
 const SkeletonLoader = () => (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-pulse">
@@ -26,263 +28,262 @@ const SkeletonLoader = () => (
       </div>
     ))}
   </div>
-);
+)
 
 const Resources = () => {
-  const [resources, setResources] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedType, setSelectedType] = useState("all");
-  const [selectedResource, setSelectedResource] = useState(null);
-  const [showFilterModal, setShowFilterModal] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
-  const [originalUrl, setOriginalUrl] = useState("");
-  const [pageTitle, setPageTitle] = useState("Learning Resources | Education Hub");
-  const modalRef = useRef(null);
-  const filterModalRef = useRef(null);
-  const [, currentUrl] = useCurrentLocation();
+  const [resources, setResources] = useState([])
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedType, setSelectedType] = useState("all")
+  const [selectedResource, setSelectedResource] = useState(null)
+  const [showFilterModal, setShowFilterModal] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("")
+  const [originalUrl, setOriginalUrl] = useState("")
+  const [pageTitle, setPageTitle] = useState("Learning Resources | Education Hub")
+  const modalRef = useRef(null)
+  const filterModalRef = useRef(null)
+  const [, currentUrl] = useCurrentLocation()
 
   // Store original URL on component mount
   useEffect(() => {
-    setOriginalUrl(window.location.href);
-  }, []);
+    setOriginalUrl(window.location.href)
+  }, [])
 
   // Function to create SEO-friendly slug from resource name
   const createSlug = (text) => {
     return text
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-  };
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "")
+  }
 
   // Function to truncate description for meta tag
   const truncateDescription = (text, maxLength = 160) => {
-    if (!text) return "Explore this learning resource to enhance your knowledge.";
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength - 3) + "...";
-  };
+    if (!text) return "Explore this learning resource to enhance your knowledge."
+    if (text.length <= maxLength) return text
+    return text.substring(0, maxLength - 3) + "..."
+  }
 
   // Update URL and browser history when resource modal opens/closes
-  const updateUrl = useCallback((resource) => {
-    if (resource) {
-      const slug = createSlug(resource.resource_name);
-      const newUrl = `${originalUrl}/${slug}`;
-      const newTitle = `${resource.resource_name}`;
-      
-      // Update the page title state
-      setPageTitle(newTitle);
-      
-      // Also update document.title directly for immediate effect
-      document.title = newTitle;
-      
-      window.history.pushState(
-        { resourceId: resource.resource_id, resourceName: resource.resource_name }, 
-        newTitle, 
-        newUrl
-      );
-    } else {
-      const defaultTitle = "Learning Resources | Education Hub";
-      setPageTitle(defaultTitle);
-      document.title = defaultTitle;
-      
-      window.history.pushState(
-        null, 
-        defaultTitle, 
-        originalUrl
-      );
-    }
-  }, [originalUrl]);
+  const updateUrl = useCallback(
+    (resource) => {
+      if (resource) {
+        const slug = createSlug(resource.resource_name)
+        const newUrl = `${originalUrl}/${slug}`
+        const newTitle = `${resource.resource_name}`
+
+        // Update the page title state
+        setPageTitle(newTitle)
+
+        // Also update document.title directly for immediate effect
+        document.title = newTitle
+
+        window.history.pushState(
+          { resourceId: resource.resource_id, resourceName: resource.resource_name },
+          newTitle,
+          newUrl,
+        )
+      } else {
+        const defaultTitle = "Learning Resources | Education Hub"
+        setPageTitle(defaultTitle)
+        document.title = defaultTitle
+
+        window.history.pushState(null, defaultTitle, originalUrl)
+      }
+    },
+    [originalUrl],
+  )
 
   // Handle browser back/forward navigation
   useEffect(() => {
     const handlePopState = (event) => {
       if (event.state && event.state.resourceId) {
         // Find and open the resource based on the state
-        const resource = resources.find(r => r.resource_id === event.state.resourceId);
+        const resource = resources.find((r) => r.resource_id === event.state.resourceId)
         if (resource) {
-          setSelectedResource(resource);
-          const newTitle = `${resource.resource_name} | Learning Resources`;
-          setPageTitle(newTitle);
-          document.title = newTitle;
+          setSelectedResource(resource)
+          const newTitle = `${resource.resource_name} | Learning Resources`
+          setPageTitle(newTitle)
+          document.title = newTitle
         }
       } else {
         // Close modal when navigating back to main page
-        setSelectedResource(null);
-        const defaultTitle = "Learning Resources | Education Hub";
-        setPageTitle(defaultTitle);
-        document.title = defaultTitle;
+        setSelectedResource(null)
+        const defaultTitle = "Learning Resources | Education Hub"
+        setPageTitle(defaultTitle)
+        document.title = defaultTitle
       }
-    };
+    }
 
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [resources]);
+    window.addEventListener("popstate", handlePopState)
+    return () => window.removeEventListener("popstate", handlePopState)
+  }, [resources])
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, DEBOUNCE_DELAY);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
+      setDebouncedSearchQuery(searchQuery)
+    }, DEBOUNCE_DELAY)
+
+    return () => clearTimeout(timer)
+  }, [searchQuery])
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+    window.scrollTo(0, 0)
+  }, [])
 
   useEffect(() => {
-    const controller = new AbortController();
+    const controller = new AbortController()
+
     const fetchResources = async () => {
       try {
-        const cachedData = sessionStorage.getItem('resourcesData');
+        const cachedData = sessionStorage.getItem("resourcesData")
         if (cachedData) {
-          const parsedData = JSON.parse(cachedData);
-          const sortedData = [...parsedData].sort((a, b) => 
-            a.resource_name.localeCompare(b.resource_name)
-          );
-          setResources(sortedData);
-          setLoading(false);
-          
+          const parsedData = JSON.parse(cachedData)
+          const sortedData = [...parsedData].sort((a, b) => a.resource_name.localeCompare(b.resource_name))
+          setResources(sortedData)
+          setLoading(false)
+
           const response = await axiosInstance.get("/api/resources/resources", {
-            signal: controller.signal
-          });
-          const sortedResponseData = [...response.data].sort((a, b) => 
-            a.resource_name.localeCompare(b.resource_name)
-          );
-          sessionStorage.setItem('resourcesData', JSON.stringify(sortedResponseData));
-          setResources(sortedResponseData);
+            signal: controller.signal,
+          })
+          const sortedResponseData = [...response.data].sort((a, b) => a.resource_name.localeCompare(b.resource_name))
+          sessionStorage.setItem("resourcesData", JSON.stringify(sortedResponseData))
+          setResources(sortedResponseData)
         } else {
           const response = await axiosInstance.get("/api/resources/resources", {
-            signal: controller.signal
-          });
-          const sortedResponseData = [...response.data].sort((a, b) => 
-            a.resource_name.localeCompare(b.resource_name)
-          );
-          sessionStorage.setItem('resourcesData', JSON.stringify(sortedResponseData));
-          setResources(sortedResponseData);
-          setLoading(false);
+            signal: controller.signal,
+          })
+          const sortedResponseData = [...response.data].sort((a, b) => a.resource_name.localeCompare(b.resource_name))
+          sessionStorage.setItem("resourcesData", JSON.stringify(sortedResponseData))
+          setResources(sortedResponseData)
+          setLoading(false)
         }
       } catch (error) {
         if (!controller.signal.aborted) {
-          setLoading(false);
+          setLoading(false)
         }
       }
-    };
-    fetchResources();
-    return () => controller.abort();
-  }, []);
+    }
 
+    fetchResources()
+    return () => controller.abort()
+  }, [])
+
+  // Handle closing modal (both button click and outside click)
+  const handleCloseModal = useCallback(() => {
+    setSelectedResource(null)
+    updateUrl(null)
+  }, [updateUrl])
+
+  // Handle clicking outside modal for resource details
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
-        setSelectedResource(null);
+        handleCloseModal() // Use handleCloseModal instead of just setSelectedResource(null)
       }
-    };
+    }
 
     if (selectedResource) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.body.style.overflow = 'hidden';
+      document.addEventListener("mousedown", handleClickOutside)
+      document.body.style.overflow = "hidden"
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.body.style.overflow = 'unset';
-    };
-  }, [selectedResource]);
+      document.removeEventListener("mousedown", handleClickOutside)
+      document.body.style.overflow = "unset"
+    }
+  }, [selectedResource, handleCloseModal])
 
+  // Handle clicking outside filter modal
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (filterModalRef.current && !filterModalRef.current.contains(event.target)) {
-        setShowFilterModal(false);
+        setShowFilterModal(false)
       }
-    };
+    }
 
     if (showFilterModal) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.body.style.overflow = 'hidden';
+      document.addEventListener("mousedown", handleClickOutside)
+      document.body.style.overflow = "hidden"
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.body.style.overflow = 'unset';
-    };
-  }, [showFilterModal]);
+      document.removeEventListener("mousedown", handleClickOutside)
+      document.body.style.overflow = "unset"
+    }
+  }, [showFilterModal])
 
   const handleIncrementViews = async (resourceName) => {
     try {
-      await axiosInstance.patch(`/api/resources/incrementviews/${resourceName}`);
+      await axiosInstance.patch(`/api/resources/incrementviews/${resourceName}`)
     } catch (error) {
-      console.error("Error incrementing views:", error);
+      console.error("Error incrementing views:", error)
     }
-  };
+  }
 
   const handleOpenModal = (resource) => {
-    setSelectedResource(resource);
-    updateUrl(resource);
-    handleIncrementViews(resource.resource_name);
+    setSelectedResource(resource)
+    updateUrl(resource)
+    handleIncrementViews(resource.resource_name)
     setResources((prevResources) =>
-      prevResources.map((res) =>
-        res.resource_id === resource.resource_id
-          ? { ...res, views: res.views + 1 }
-          : res
-      )
-    );
-  };
-
-  const handleCloseModal = () => {
-    setSelectedResource(null);
-    updateUrl(null);
-  };
+      prevResources.map((res) => (res.resource_id === resource.resource_id ? { ...res, views: res.views + 1 } : res)),
+    )
+  }
 
   const filterResources = useCallback((data, query, type) => {
-    let filtered = data;
+    let filtered = data
+
     if (query) {
-      const lowercaseQuery = query.toLowerCase();
-      filtered = filtered.filter((resource) => 
-        resource.resource_name.toLowerCase().includes(lowercaseQuery) ||
-        resource.resource_description?.toLowerCase().includes(lowercaseQuery)
-      );
+      const lowercaseQuery = query.toLowerCase()
+      filtered = filtered.filter(
+        (resource) =>
+          resource.resource_name.toLowerCase().includes(lowercaseQuery) ||
+          resource.resource_description?.toLowerCase().includes(lowercaseQuery),
+      )
     }
+
     if (type !== "all") {
-      filtered = filtered.filter((resource) => 
-        type === "video" ? resource.resource_type === "youtube" : resource.resource_type === type
-      );
+      filtered = filtered.filter((resource) =>
+        type === "video" ? resource.resource_type === "youtube" : resource.resource_type === type,
+      )
     }
-    return filtered;
-  }, []);
+
+    return filtered
+  }, [])
 
   useEffect(() => {
-    setCurrentPage(1);
-  }, [debouncedSearchQuery, selectedType]);
+    setCurrentPage(1)
+  }, [debouncedSearchQuery, selectedType])
 
-  const filteredResources = filterResources(resources, debouncedSearchQuery, selectedType);
-  const totalPages = Math.ceil(filteredResources.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentResources = filteredResources.slice(startIndex, endIndex);
+  const filteredResources = filterResources(resources, debouncedSearchQuery, selectedType)
+  const totalPages = Math.ceil(filteredResources.length / ITEMS_PER_PAGE)
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+  const endIndex = startIndex + ITEMS_PER_PAGE
+  const currentResources = filteredResources.slice(startIndex, endIndex)
 
   const handlePageChange = useCallback((pageNumber) => {
-    setCurrentPage(pageNumber);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
+    setCurrentPage(pageNumber)
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }, [])
 
   const handleFilterSelect = (type) => {
-    setSelectedType(type);
-    setShowFilterModal(false);
-  };
+    setSelectedType(type)
+    setShowFilterModal(false)
+  }
 
   const clearAllFilters = useCallback(() => {
-    setSelectedType("all");
-    setSearchQuery("");
-    setShowFilterModal(false);
-  }, []);
+    setSelectedType("all")
+    setSearchQuery("")
+    setShowFilterModal(false)
+  }, [])
 
   // Generate dynamic meta tags based on selected resource
   const generateMetaTags = () => {
     if (selectedResource) {
-      const resourceType = selectedResource.resource_type === 'youtube' ? 'video' : selectedResource.resource_type;
-      const currentResourceUrl = `${originalUrl}/${createSlug(selectedResource.resource_name)}`;
-      
+      const resourceType = selectedResource.resource_type === "youtube" ? "video" : selectedResource.resource_type
+      const currentResourceUrl = `${originalUrl}/${createSlug(selectedResource.resource_name)}`
+
       return (
         <>
           <Title>{pageTitle}</Title>
@@ -295,27 +296,42 @@ const Resources = () => {
           <Meta name="twitter:card" content="summary_large_image" />
           <Meta name="twitter:title" content={pageTitle} />
           <Meta name="twitter:description" content={truncateDescription(selectedResource.resource_description)} />
-          <Meta name="keywords" content={`learning, education, ${resourceType}, ${selectedResource.resource_name.toLowerCase()}`} />
+          <Meta
+            name="keywords"
+            content={`learning, education, ${resourceType}, ${selectedResource.resource_name.toLowerCase()}`}
+          />
         </>
-      );
+      )
     }
 
     return (
       <>
         <Title>{pageTitle}</Title>
-        <Meta name="description" content="Explore high-quality learning resources and structured guides designed to help you learn faster, grow confidently, and reach expert-level knowledge across a wide range of technologies and career paths." />
+        <Meta
+          name="description"
+          content="Explore high-quality learning resources and structured guides designed to help you learn faster, grow confidently, and reach expert-level knowledge across a wide range of technologies and career paths."
+        />
         <Meta rel="canonical" href={currentUrl} />
         <Meta property="og:title" content={pageTitle} />
-        <Meta property="og:description" content="Explore high-quality learning resources and structured guides designed to help you learn faster, grow confidently, and reach expert-level knowledge across a wide range of technologies and career paths." />
+        <Meta
+          property="og:description"
+          content="Explore high-quality learning resources and structured guides designed to help you learn faster, grow confidently, and reach expert-level knowledge across a wide range of technologies and career paths."
+        />
         <Meta property="og:url" content={currentUrl} />
         <Meta property="og:type" content="website" />
         <Meta name="twitter:card" content="summary_large_image" />
         <Meta name="twitter:title" content={pageTitle} />
-        <Meta name="twitter:description" content="Explore high-quality learning resources and structured guides designed to help you learn faster, grow confidently, and reach expert-level knowledge across a wide range of technologies and career paths." />
-        <Meta name="keywords" content="learning resources, education, online courses, tutorials, articles, videos, career development" />
+        <Meta
+          name="twitter:description"
+          content="Explore high-quality learning resources and structured guides designed to help you learn faster, grow confidently, and reach expert-level knowledge across a wide range of technologies and career paths."
+        />
+        <Meta
+          name="keywords"
+          content="learning resources, education, online courses, tutorials, articles, videos, career development"
+        />
       </>
-    );
-  };
+    )
+  }
 
   if (loading) {
     return (
@@ -331,13 +347,12 @@ const Resources = () => {
           <SkeletonLoader />
         </div>
       </div>
-    );
+    )
   }
 
   return (
     <>
       {generateMetaTags()}
-
       <div className="min-h-screen">
         <div className="max-w-7xl mx-auto px-4 py-16 md:px-8 space-y-12">
           {/* Hero Section */}
@@ -349,14 +364,18 @@ const Resources = () => {
               Curated content to accelerate your journey to mastery
             </p>
           </div>
-          
+
           {/* Search and Filter Section */}
           <div className="max-w-3xl mx-auto px-4 flex gap-4">
             {/* Search Bar */}
             <div className="flex-1 relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-500"></div>
               <div className="relative">
-                <Search className="absolute left-4 md:left-6 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} aria-hidden="true" />
+                <Search
+                  className="absolute left-4 md:left-6 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  size={20}
+                  aria-hidden="true"
+                />
                 <input
                   type="search"
                   placeholder="Search resources by name or description..."
@@ -375,12 +394,10 @@ const Resources = () => {
             >
               <Filter size={20} />
               <span className="hidden sm:inline font-medium">Filters</span>
-              {selectedType !== "all" && (
-                <span className="w-2 h-2 bg-indigo-500 rounded-full"></span>
-              )}
+              {selectedType !== "all" && <span className="w-2 h-2 bg-indigo-500 rounded-full"></span>}
             </button>
           </div>
-          
+
           {/* Active Filter Display */}
           {selectedType !== "all" && (
             <div className="flex justify-center px-4">
@@ -397,16 +414,20 @@ const Resources = () => {
               </div>
             </div>
           )}
-          
+
           {/* Results Count */}
           {filteredResources.length > 0 && (
             <div className="flex justify-between items-center max-w-7xl mx-auto px-4">
               <p className="text-sm md:text-base text-gray-600">
-                Showing <span className="font-semibold text-indigo-600">{startIndex + 1}-{Math.min(endIndex, filteredResources.length)}</span> of <span className="font-semibold text-indigo-600">{filteredResources.length}</span> resources
+                Showing{" "}
+                <span className="font-semibold text-indigo-600">
+                  {startIndex + 1}-{Math.min(endIndex, filteredResources.length)}
+                </span>{" "}
+                of <span className="font-semibold text-indigo-600">{filteredResources.length}</span> resources
               </p>
             </div>
           )}
-          
+
           {/* Resources Grid */}
           <Suspense fallback={<SkeletonLoader />}>
             {currentResources.length === 0 ? (
@@ -415,7 +436,9 @@ const Resources = () => {
                   <AlertCircle size={40} className="mx-auto" aria-hidden="true" />
                 </div>
                 <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 md:mb-4">No resources found</h3>
-                <p className="text-base md:text-lg text-gray-600 mb-6 md:mb-8">We couldn't find any resources matching your criteria. Try adjusting your search or filter.</p>
+                <p className="text-base md:text-lg text-gray-600 mb-6 md:mb-8">
+                  We couldn't find any resources matching your criteria. Try adjusting your search or filter.
+                </p>
                 <button
                   onClick={clearAllFilters}
                   className="px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 text-base md:text-lg font-medium shadow-lg hover:shadow-xl"
@@ -436,14 +459,16 @@ const Resources = () => {
                     <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/0 to-purple-500/0 group-hover:from-indigo-500/10 group-hover:to-purple-500/10 transition-all duration-500"></div>
                     <div className="flex justify-between items-start mb-4 md:mb-6">
                       <span className="px-3 md:px-4 py-1 md:py-2 text-xs md:text-sm font-semibold rounded-full bg-indigo-500/10 text-indigo-600">
-                        {resource.resource_type === 'youtube' ? 'video' : resource.resource_type}
+                        {resource.resource_type === "youtube" ? "video" : resource.resource_type}
                       </span>
                       <div className="flex items-center text-gray-500 text-xs md:text-sm">
                         <Eye size={16} className="mr-1" />
                         {resource.views.toLocaleString()}
                       </div>
                     </div>
-                    <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 md:mb-4">{resource.resource_name}</h3>
+                    <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 md:mb-4">
+                      {resource.resource_name}
+                    </h3>
                     <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-8 leading-relaxed line-clamp-3">
                       {resource.resource_description || "Explore this learning resource to enhance your knowledge."}
                     </p>
@@ -452,14 +477,18 @@ const Resources = () => {
                       aria-label={`View ${resource.resource_name} resource`}
                     >
                       <span>Explore Details</span>
-                      <ArrowRight size={16} aria-hidden="true" className="transform group-hover:translate-x-1 transition-transform duration-300" />
+                      <ArrowRight
+                        size={16}
+                        aria-hidden="true"
+                        className="transform group-hover:translate-x-1 transition-transform duration-300"
+                      />
                     </button>
                   </div>
                 ))}
               </div>
             )}
           </Suspense>
-          
+
           {/* Pagination */}
           {totalPages > 1 && (
             <nav className="flex justify-center items-center gap-2 md:gap-3 mt-8 md:mt-12 px-4" aria-label="Pagination">
@@ -477,18 +506,20 @@ const Resources = () => {
               </button>
 
               {[...Array(totalPages)].map((_, index) => {
-                const pageNumber = index + 1;
-                const isCurrentPage = pageNumber === currentPage;
+                const pageNumber = index + 1
+                const isCurrentPage = pageNumber === currentPage
                 const isWithinRange =
-                  pageNumber === 1 ||
-                  pageNumber === totalPages ||
-                  Math.abs(pageNumber - currentPage) <= 1;
+                  pageNumber === 1 || pageNumber === totalPages || Math.abs(pageNumber - currentPage) <= 1
 
                 if (!isWithinRange) {
                   if (pageNumber === 2 || pageNumber === totalPages - 1) {
-                    return <span key={pageNumber} className="text-gray-400">•••</span>;
+                    return (
+                      <span key={pageNumber} className="text-gray-400">
+                        •••
+                      </span>
+                    )
                   }
-                  return null;
+                  return null
                 }
 
                 return (
@@ -505,7 +536,7 @@ const Resources = () => {
                   >
                     {pageNumber}
                   </button>
-                );
+                )
               })}
 
               <button
@@ -527,15 +558,12 @@ const Resources = () => {
 
       {/* Filter Modal */}
       {showFilterModal && (
-        <div 
+        <div
           className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           aria-modal="true"
           role="dialog"
         >
-          <div 
-            ref={filterModalRef}
-            className="bg-white rounded-2xl w-full max-w-md shadow-2xl relative"
-          >
+          <div ref={filterModalRef} className="bg-white rounded-2xl w-full max-w-md shadow-2xl relative">
             <div className="flex justify-between items-center p-6 border-b border-gray-200">
               <h3 className="text-xl font-bold text-gray-900">Filter Resources</h3>
               <button
@@ -546,7 +574,6 @@ const Resources = () => {
                 <X size={20} className="text-gray-500" />
               </button>
             </div>
-
             <div className="p-6 space-y-4">
               <div>
                 <h4 className="text-sm font-semibold text-gray-700 mb-3">Resource Type</h4>
@@ -562,18 +589,13 @@ const Resources = () => {
                       }`}
                     >
                       <div className="flex justify-between items-center">
-                        <span className="font-medium">
-                          {type.charAt(0).toUpperCase() + type.slice(1)}
-                        </span>
-                        {selectedType === type && (
-                          <div className="w-2 h-2 bg-white rounded-full"></div>
-                        )}
+                        <span className="font-medium">{type.charAt(0).toUpperCase() + type.slice(1)}</span>
+                        {selectedType === type && <div className="w-2 h-2 bg-white rounded-full"></div>}
                       </div>
                     </button>
                   ))}
                 </div>
               </div>
-
               <div className="pt-4 border-t border-gray-200">
                 <button
                   onClick={clearAllFilters}
@@ -589,23 +611,21 @@ const Resources = () => {
 
       {/* Resource Details Modal */}
       {selectedResource && (
-        <div 
+        <div
           className="fixed inset-0 bg-gray-900/90 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           aria-modal="true"
           role="dialog"
         >
-          <div 
+          <div
             ref={modalRef}
             className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl relative"
           >
             <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-start z-10">
               <div className="flex-1 pr-6">
                 <span className="px-4 py-2 text-sm font-semibold rounded-full bg-indigo-500/10 text-indigo-600 mb-3 inline-block">
-                  {selectedResource.resource_type === 'youtube' ? 'video' : selectedResource.resource_type}
+                  {selectedResource.resource_type === "youtube" ? "video" : selectedResource.resource_type}
                 </span>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {selectedResource.resource_name}
-                </h2>
+                <h2 className="text-2xl font-bold text-gray-900">{selectedResource.resource_name}</h2>
               </div>
               <button
                 onClick={handleCloseModal}
@@ -615,25 +635,17 @@ const Resources = () => {
                 <X size={24} className="text-gray-500" />
               </button>
             </div>
-
             <div className="p-6 space-y-6">
               <div className="flex items-center text-gray-500 text-sm">
                 <Eye size={18} className="mr-2" />
                 {selectedResource.views.toLocaleString()} learners have viewed this resource
               </div>
-
               <div className="prose max-w-none">
                 {selectedResource.resource_description && (
-                  <p className="text-gray-600 text-lg leading-relaxed">
-                    {selectedResource.resource_description}
-                  </p>
+                  <p className="text-gray-600 text-lg leading-relaxed">{selectedResource.resource_description}</p>
                 )}
-                <div
-                  className="mt-6 text-gray-800"
-                  dangerouslySetInnerHTML={{ __html: selectedResource.content }}
-                />
+                <div className="mt-6 text-gray-800" dangerouslySetInnerHTML={{ __html: selectedResource.content }} />
               </div>
-
               <div className="sticky bottom-0 bg-white border-t border-gray-200 pt-6 flex justify-end">
                 <button
                   onClick={handleCloseModal}
@@ -647,7 +659,7 @@ const Resources = () => {
         </div>
       )}
     </>
-  );
-};
+  )
+}
 
-export default Resources;
+export default Resources

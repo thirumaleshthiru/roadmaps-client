@@ -1,10 +1,48 @@
 "use client"
+
 import { useEffect, useState, useRef, useMemo, useCallback } from "react"
-import { Title, Meta } from "react-head" // Re-added react-head
-import { useCurrentLocation } from "../utils/useFulFunctions.js" // Re-added useCurrentLocation
+import { Title, Meta } from "react-head"
+import { useCurrentLocation } from "../utils/useFulFunctions.js"
 import { ChevronRight, Award, Book, Send, Loader2, X, Check } from "lucide-react"
-import { GoogleGenerativeAI } from "@google/generative-ai" // Corrected import path for GoogleGenerativeAI
-import { Link } from "react-router-dom" // Re-added Link from react-router-dom
+import { GoogleGenerativeAI } from "@google/generative-ai"
+import { Link } from "react-router-dom"
+
+// Define the response schema for the AI model
+const roadmapResponseSchema = {
+  type: "object",
+  properties: {
+    roadmap_id: { type: "integer" },
+    roadmap_name: { type: "string" },
+    roadmap_description: { type: "string" },
+    created_at: { type: "string", format: "date-time" },
+    meta_title: { type: "string" },
+    meta_description: { type: "string" },
+    concepts: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          concept_id: { type: "integer" },
+          concept_name: { type: "string" },
+          concept_description: { type: "string" },
+          concept_details: { type: "string" }, // This will contain the formatted summary, key concepts, and examples
+          roadmap_id: { type: "integer" },
+          resources: { type: "string", nullable: true }, // Added resources as it's used in ConceptPopup
+        },
+        required: ["concept_id", "concept_name", "concept_description", "concept_details", "roadmap_id"],
+      },
+    },
+  },
+  required: [
+    "roadmap_id",
+    "roadmap_name",
+    "roadmap_description",
+    "created_at",
+    "meta_title",
+    "meta_description",
+    "concepts",
+  ],
+}
 
 function Concept({ concept, index, onClick, marked, onMarkToggle, totalConcepts }) {
   const isEven = index % 2 === 0
@@ -18,11 +56,11 @@ function Concept({ concept, index, onClick, marked, onMarkToggle, totalConcepts 
       <div className={`w-full md:w-5/12 px-1 mb-6 md:mb-0 z-10`}>
         <div
           className={`
-            p-3 rounded-xl bg-white cursor-pointer 
-            transform transition-all duration-300 
-            hover:scale-102 hover:shadow-2xl 
+            p-3 rounded-xl bg-white cursor-pointer
+            transform transition-all duration-300
+            hover:scale-102 hover:shadow-2xl
             ${marked ? "border-l-4 border-green-500" : "border-l-4 border-transparent"}
-            relative overflow-hidden 
+            relative overflow-hidden
             shadow-[0_3px_10px_rgb(0,0,0,0.2)]
           `}
           onClick={onClick}
@@ -51,10 +89,10 @@ function Concept({ concept, index, onClick, marked, onMarkToggle, totalConcepts 
       <div className="w-full md:w-2/12 flex justify-center relative">
         <button
           className={`
-            w-12 h-12 rounded-full 
+            w-12 h-12 rounded-full
             ${marked ? "bg-green-500" : "bg-white border-2 border-indigo-500"}
-            shadow-lg z-20 flex items-center justify-center 
-            cursor-pointer transition-all duration-300 
+            shadow-lg z-20 flex items-center justify-center
+            cursor-pointer transition-all duration-300
             hover:scale-110 focus:outline-none
           `}
           onClick={onMarkToggle}
@@ -130,7 +168,6 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
     ],
     [],
   )
-
   // Function to format text with markdown-like syntax
   const formatText = useCallback((text) => {
     if (!text) return ""
@@ -149,7 +186,6 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
       .replace(/\n/g, "<br>")
     return formattedText
   }, [])
-
   // Function to format plain text content with basic styling and markdown
   const formatContent = (content) => {
     if (!content) return ""
@@ -230,7 +266,6 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
       )
     })
   }
-
   // Handle animation
   useEffect(() => {
     if (concept) {
@@ -239,7 +274,6 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
       return () => clearTimeout(timer)
     }
   }, [concept])
-
   // Use useCallback to memoize the handleClose function
   const handleClose = useCallback(() => {
     setIsAnimating(true)
@@ -247,7 +281,6 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
       onClose()
     }, 200)
   }, [onClose])
-
   // Handle completing the concept
   const handleComplete = useCallback(() => {
     if (onMarkToggle && concept) {
@@ -258,7 +291,6 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
       }, 200)
     }
   }, [concept, onClose, onMarkToggle])
-
   // Select a random quote when component mounts or concept changes
   useEffect(() => {
     if (concept) {
@@ -266,7 +298,6 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
       setQuote(motivationalQuotes[randomIndex])
     }
   }, [concept, motivationalQuotes])
-
   // Close when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -289,14 +320,12 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
       document.removeEventListener("keydown", handleEscapeKey)
     }
   }, [handleClose])
-
   if (!concept) return null
-
   return (
     <div
       className={`
         fixed inset-0 bg-black/40 backdrop-blur-sm
-        flex items-center justify-center z-50 
+        flex items-center justify-center z-50
         px-4 py-6 sm:px-6 lg:px-8
         transition-all duration-300 ease-out
         ${isAnimating ? "opacity-0" : "opacity-100"}
@@ -306,9 +335,9 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
         ref={modalRef}
         className={`
           bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl
-          w-full max-w-2xl lg:max-w-3xl xl:max-w-4xl 
+          w-full max-w-2xl lg:max-w-3xl xl:max-w-4xl
           max-h-[85vh] sm:max-h-[90vh]
-          flex flex-col 
+          flex flex-col
           transition-all duration-300 ease-out
           border border-gray-100/50
           ${isAnimating ? "scale-95 opacity-0" : "scale-100 opacity-100"}
@@ -355,22 +384,22 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 sm:flex-initial inline-flex items-center justify-center px-6 py-3
-                           bg-indigo-50 hover:bg-indigo-100
-                           text-indigo-600 text-sm font-medium
-                           rounded-2xl transition-all duration-200
-                           border border-indigo-200/50 hover:border-indigo-300/50"
+                                bg-indigo-50 hover:bg-indigo-100
+                                text-indigo-600 text-sm font-medium
+                                rounded-2xl transition-all duration-200
+                                border border-indigo-200/50 hover:border-indigo-300/50"
               >
                 Resources
               </a>
             )}
             <button
               className={`flex-1 sm:flex-initial inline-flex items-center justify-center px-6 py-3
-                         text-sm font-medium rounded-2xl transition-all duration-200
-                         ${
-                           marked
-                             ? "bg-green-50 hover:bg-green-100 text-green-700 border border-green-200/50 hover:border-green-300/50"
-                             : "bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow-md"
-                         }`}
+                                text-sm font-medium rounded-2xl transition-all duration-200
+                                ${
+                                  marked
+                                    ? "bg-green-50 hover:bg-green-100 text-green-700 border border-green-200/50 hover:border-green-300/50"
+                                    : "bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow-md"
+                                }`}
               onClick={handleComplete}
             >
               <Check size={16} className="mr-2" />
@@ -378,8 +407,8 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
             </button>
             <button
               className="flex-1 sm:flex-initial inline-flex items-center justify-center px-6 py-3
-                         bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium
-                         rounded-2xl transition-all duration-200 shadow-sm hover:shadow-md"
+                                bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium
+                                rounded-2xl transition-all duration-200 shadow-sm hover:shadow-md"
               onClick={handleClose}
             >
               Got it
@@ -391,7 +420,7 @@ function ConceptPopup({ concept, onClose, marked, onMarkToggle }) {
   )
 }
 
-// Initialize Google Generative AI
+// Initialize Google Generative AI with the provided API key
 const genAI = new GoogleGenerativeAI("AIzaSyBmU-6zbaAKVpc8biv_NnA6opYJ5AER5HA")
 
 function AIGenerated() {
@@ -400,7 +429,7 @@ function AIGenerated() {
   const [markedConcepts, setMarkedConcepts] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [, currentUrl] = useCurrentLocation() // Re-added useCurrentLocation
+  const [, currentUrl] = useCurrentLocation()
   const [promptInput, setPromptInput] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
   const [generationProgress, setGenerationProgress] = useState(0)
@@ -425,171 +454,6 @@ function AIGenerated() {
     } catch (err) {
       console.error("Error saving marked concepts:", err)
     }
-  }
-
-  // Enhanced JSON sanitization and parsing function
-  const parseAIResponse = (responseText) => {
-    console.log("Raw AI response length:", responseText.length)
-    // Step 1: Clean the response text
-    const cleanedText = responseText
-      .replace(/```json|```/g, "") // Remove code block markers
-      .replace(/^\uFEFF/, "") // Remove BOM
-      .replace(/[\x00-\x1F\x7F-\x9F]/g, "") // Remove control characters - FIX APPLIED HERE
-      .trim()
-    console.log("Cleaned text length:", cleanedText.length)
-
-    // Step 2: Find JSON boundaries
-    const firstBrace = cleanedText.indexOf("{")
-    const lastBrace = cleanedText.lastIndexOf("}")
-    if (firstBrace === -1 || lastBrace === -1 || firstBrace >= lastBrace) {
-      throw new Error("No valid JSON structure found in response")
-    }
-    const jsonContent = cleanedText.substring(firstBrace, lastBrace + 1)
-    console.log("Extracted JSON length:", jsonContent.length)
-
-    // Step 3: Apply multiple cleaning strategies
-    const cleaningStrategies = [
-      // Strategy 1: Basic cleaning
-      (text) =>
-        text
-          .replace(/,(\s*[}\]])/g, "$1") // Remove trailing commas
-          .replace(/([{,]\s*)(\w+):/g, '$1"$2":') // Quote unquoted keys
-          .replace(/:\s*'([^']*)'/g, ': "$1"'), // Replace single quotes
-      // Strategy 2: Fix string values with newlines
-      (text) => {
-        const lines = text.split("\n")
-        return lines
-          .map((line, index) => {
-            if (line.includes(":") && line.includes('"')) {
-              const colonIndex = line.indexOf(":")
-              const beforeColon = line.substring(0, colonIndex + 1)
-              const afterColon = line.substring(colonIndex + 1).trim()
-              if (afterColon.startsWith('"')) {
-                // Find proper string boundaries and escape content
-                let inString = false
-                let escaped = false
-                let result = beforeColon + ' "'
-                for (let i = 1; i < afterColon.length; i++) {
-                  const char = afterColon[i]
-                  if (!inString && char === '"') {
-                    inString = true
-                    continue
-                  }
-                  if (inString) {
-                    if (escaped) {
-                      result += char
-                      escaped = false
-                    } else if (char === "\\") {
-                      result += "\\\\"
-                      escaped = true
-                    } else if (char === '"') {
-                      result += '"' + afterColon.substring(i + 1)
-                      break
-                    } else if (char === "\n") {
-                      result += "\\n"
-                    } else if (char === "\r") {
-                      result += "\\r"
-                    } else if (char === "\t") {
-                      result += "\\t"
-                    } else {
-                      result += char
-                    }
-                  }
-                }
-                return result
-              }
-            }
-            return line
-          })
-          .join("\n")
-      },
-      // Strategy 3: Handle malformed arrays and objects
-      (text) => {
-        // Fix missing commas between array elements
-        text = text.replace(/}\s*{/g, "}, {")
-        // Fix missing commas between object properties
-        text = text.replace(/"\s*"/g, '", "')
-        return text
-      },
-    ]
-
-    // Step 4: Try each cleaning strategy
-    for (let i = 0; i < cleaningStrategies.length; i++) {
-      try {
-        const cleanedJson = cleaningStrategies[i](jsonContent)
-        const parsed = JSON.parse(cleanedJson)
-        // Validate the structure
-        if (parsed && typeof parsed === "object" && parsed.roadmap_id && Array.isArray(parsed.concepts)) {
-          console.log(`Successfully parsed with strategy ${i + 1}`)
-          return parsed
-        }
-      } catch (strategyError) {
-        console.log(`Strategy ${i + 1} failed:`, strategyError.message)
-        continue
-      }
-    }
-
-    // Step 5: Last resort - try to extract and reconstruct JSON manually
-    try {
-      console.log("Attempting manual JSON reconstruction...")
-      // Extract key components using regex
-      const roadmapIdMatch = cleanedText.match(/"roadmap_id":\s*(\d+)/)
-      const roadmapNameMatch = cleanedText.match(/"roadmap_name":\s*"([^"]*)"/)
-      const roadmapDescMatch = cleanedText.match(/"roadmap_description":\s*"([^"]*)"/)
-
-      if (!roadmapIdMatch || !roadmapNameMatch) {
-        throw new Error("Could not extract essential roadmap data")
-      }
-
-      // Try to extract concepts array
-      const conceptsMatch = cleanedText.match(/"concepts":\s*\[(.*)\]/s)
-      if (!conceptsMatch) {
-        throw new Error("Could not extract concepts array")
-      }
-
-      // Build a minimal valid structure
-      const fallbackRoadmap = {
-        roadmap_id: Number.parseInt(roadmapIdMatch[1]),
-        roadmap_name: roadmapNameMatch[1],
-        roadmap_description: roadmapDescMatch ? roadmapDescMatch[1] : `Learn ${roadmapNameMatch[1]} step by step`,
-        created_at: new Date().toISOString(),
-        meta_title: `${roadmapNameMatch[1]}-roadmap`,
-        meta_description: `A comprehensive step-by-step guide to learning ${roadmapNameMatch[1]}`,
-        concepts: [],
-      }
-
-      // Try to extract individual concepts
-      const conceptMatches = [...conceptsMatch[1].matchAll(/{[^}]*"concept_id":\s*(\d+)[^}]*}/g)]
-      conceptMatches.forEach((match, index) => {
-        try {
-          const conceptText = match[0]
-          const conceptId = Number.parseInt(match[1])
-          const nameMatch = conceptText.match(/"concept_name":\s*"([^"]*)"/)
-          const descMatch = conceptText.match(/"concept_description":\s*"([^"]*)"/)
-
-          if (nameMatch) {
-            fallbackRoadmap.concepts.push({
-              concept_id: conceptId,
-              concept_name: nameMatch[1],
-              concept_description: descMatch ? descMatch[1] : `Learn about ${nameMatch[1]}`,
-              concept_details: `Brief Summary: This concept covers ${nameMatch[1]}. Key Concepts: - Understanding the basics - Practical applications - Best practices Examples: - Example 1 - Example 2 - Example 3`,
-              roadmap_id: fallbackRoadmap.roadmap_id,
-            })
-          }
-        } catch (conceptError) {
-          console.log(`Failed to parse concept ${index + 1}:`, conceptError.message)
-        }
-      })
-
-      if (fallbackRoadmap.concepts.length > 0) {
-        console.log(`Fallback reconstruction successful with ${fallbackRoadmap.concepts.length} concepts`)
-        return fallbackRoadmap
-      }
-    } catch (fallbackError) {
-      console.error("Fallback reconstruction failed:", fallbackError.message)
-    }
-
-    throw new Error("All JSON parsing strategies failed")
   }
 
   useEffect(() => {
@@ -618,42 +482,44 @@ function AIGenerated() {
     try {
       const model = genAI.getGenerativeModel({
         model: "gemini-2.5-flash",
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: roadmapResponseSchema, // Use the defined schema here
+        },
       })
       setGenerationProgress(20)
 
       // Generate a unique roadmap ID
       const roadmapId = Date.now()
       const prompt = `Create a comprehensive learning roadmap for the topic: **${topic}**
-
 Format your response as a JSON object using EXACTLY the following structure:
 {
-  "roadmap_id": ${roadmapId},
-  "roadmap_name": "${topic}",
-  "roadmap_description": "${topic} description in 50 words",
-  "created_at": "${new Date().toISOString()}",
-  "meta_title": "${topic}-roadmap",
-  "meta_description": "A comprehensive step-by-step guide to learning ${topic}",
-  "concepts": [
-    {
-      "concept_id": 1,
-      "concept_name": "Introduction to ${topic}",
-      "concept_description": "A brief overview of what ${topic} is and why it matters",
-      "concept_details": "Brief Summary: A very brief and comprehensive summary of this concept in 300-500 words. Key Concepts: - First key concept - Second key concept - Third key concept - Fourth key concept Examples: - Practical example 1 - Practical example 2 - Practical example 3",
-      "roadmap_id": ${roadmapId}
-    }
-  ]
+"roadmap_id": ${roadmapId},
+"roadmap_name": "${topic}",
+"roadmap_description": "${topic} description in 50 words",
+"created_at": "${new Date().toISOString()}",
+"meta_title": "${topic}-roadmap",
+"meta_description": "A comprehensive step-by-step guide to learning ${topic}",
+"concepts": [
+  {
+    "concept_id": 1,
+    "concept_name": "Introduction to ${topic}",
+    "concept_description": "A brief overview of what ${topic} is and why it matters",
+    "concept_details": "Brief Summary: A very brief and comprehensive summary of this concept in 300-500 words. Key Concepts: - First key concept - Second key concept - Third key concept - Fourth key concept Examples: - Practical example 1 - Practical example 2 - Practical example 3",
+    "roadmap_id": ${roadmapId},
+    "resources": null
+  }
+]
 }
-
 IMPORTANT: If the topic is adult, unethical, illegal, violent, self harm or harmful in any way — such as topics involving sex, drugs, violence, scams, or anything inappropriate — DO NOT generate a roadmap for it. Instead, generate a complete roadmap for "Bhagavad Gita" by default, without mentioning or referencing the original topic at all.
-
 STRICT REQUIREMENTS:
 1. If the topic is harmful or inappropriate, IGNORE it and use "Bhagavad Gita" instead.
 2. Generate 20-25 concepts that cover the COMPLETE learning journey from beginner to advanced.
 3. Each concept must build logically on previous concepts.
 4. For concept_details, use ONLY this exact format:
-    - Summary: (300-500 words) - must be clear and comprehensive.
-    - Key Concepts: bullet points of essential ideas.
-    - Examples: 5-7 practical real-world examples or use cases.
+  - Brief Summary: (300-500 words) - must be clear and comprehensive.
+  - Key Concepts: bullet points of essential ideas.
+  - Examples: 5-7 practical real-world examples or use cases.
 5. Start from complete beginner concepts with no prior knowledge assumed.
 6. Final concepts should cover advanced professional-level topics.
 7. Use double newlines between each concept block.
@@ -662,7 +528,6 @@ STRICT REQUIREMENTS:
 10. Return ONLY the JSON object. Do NOT include any explanation, disclaimer, or extra text.
 11. If a hands-on project is genuinely needed for mastering the topic, include it as the final concept using the same structure as other concepts. Do not include a project if it doesn't add practical value.
 Make sure the JSON is valid and all strings are properly escaped.`
-
       setGenerationProgress(30)
       const result = await model.generateContent(prompt)
       setGenerationProgress(70)
@@ -670,10 +535,10 @@ Make sure the JSON is valid and all strings are properly escaped.`
       setGenerationProgress(80)
 
       try {
-        // Use the enhanced parsing function
-        const roadmapData = parseAIResponse(responseText)
+        // Direct parsing since responseSchema guarantees valid JSON
+        const roadmapData = JSON.parse(responseText)
 
-        // Additional validation
+        // Additional validation (though schema should enforce most of this)
         if (!roadmapData.roadmap_id || !roadmapData.concepts || !Array.isArray(roadmapData.concepts)) {
           throw new Error("Invalid roadmap structure after parsing")
         }
@@ -690,8 +555,8 @@ Make sure the JSON is valid and all strings are properly escaped.`
         setError(null)
         console.log(`Successfully generated roadmap with ${roadmapData.concepts.length} concepts`)
       } catch (parseError) {
-        console.error("Enhanced parsing failed:", parseError)
-        // Create a basic fallback roadmap
+        console.error("JSON parsing failed:", parseError)
+        // Fallback to a basic roadmap if parsing fails unexpectedly
         const fallbackRoadmap = {
           roadmap_id: roadmapId,
           roadmap_name: topic,
@@ -706,6 +571,7 @@ Make sure the JSON is valid and all strings are properly escaped.`
               concept_description: `Get started with ${topic} fundamentals`,
               concept_details: `Brief Summary: This is an introduction to ${topic}. We'll cover the basic concepts and get you started on your learning journey. Key Concepts: - Understanding what ${topic} is - Why ${topic} is important - Basic terminology - Getting started Examples: - Real-world applications - Common use cases - Getting started resources`,
               roadmap_id: roadmapId,
+              resources: null,
             },
           ],
         }
@@ -870,7 +736,6 @@ Make sure the JSON is valid and all strings are properly escaped.`
             </button>
           </form>
         </div>
-
         {roadmap ? (
           <>
             <div className="flex items-center space-x-2 text-sm text-gray-600 mb-8">
@@ -884,7 +749,6 @@ Make sure the JSON is valid and all strings are properly escaped.`
               <ChevronRight size={16} />
               <span className="font-medium text-indigo-600">{roadmap.roadmap_name}</span>
             </div>
-
             {/* Progress bar */}
             <div className="bg-white rounded-xl shadow-md p-4 mb-8">
               <div className="flex justify-between items-center mb-2">
@@ -901,7 +765,6 @@ Make sure the JSON is valid and all strings are properly escaped.`
                 {markedConcepts.length} of {roadmap.concepts ? roadmap.concepts.length : 0} concepts completed
               </p>
             </div>
-
             {roadmap.concepts && roadmap.concepts.length > 0 ? (
               <div className="relative p-6">
                 <div className="flex md:items-center flex-col md:flex-row gap-4 justify-between mb-8">
@@ -928,7 +791,6 @@ Make sure the JSON is valid and all strings are properly escaped.`
                 </p>
               </div>
             )}
-
             <ConceptPopup
               concept={selectedConcept}
               onClose={handleClosePopup}
